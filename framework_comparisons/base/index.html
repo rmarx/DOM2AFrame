@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Base JavaScript</title>
+    <link rel="stylesheet" href="css.css">
+</head>
+
+<body>
+
+    <!-- ideally, we would use an HTML-import statement here (see web components) but Firefox doesn't support this yet... --> 
+    <div id="container" style="width: 500px; border: 3px solid black; padding: 5px;">
+        <div id="top">
+            <input id="textInput" type="text" value="initvalue" style="width: 100%;" /><br/>
+            <input id="checkboxInput" type="checkbox" value="initvalue">Checkbox input<br/>
+        </div>
+        <div id="center" style="width: 50%; border: 1px solid green;">
+            <div id="imageLeft" style="float: left; width: 30%; padding: 5px;">
+                <img src="webvr-logo-square.png" style="width: 100%; border: 1px solid red;" onclick="imageClicked()"/>
+            </div>
+            <div id="textRight" style="float: left; border: 1px solid blue; padding: 5px;">
+                <p>paragraph 1</p>
+                <p>paragraph 2</p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        <div id="bottom">
+            <a href="http://google.com" target="_blank">google.com</a>
+        </div>
+        <div id="none" style="display: none;">I was not displayed!</div>
+        <div id="hidden" style="visibility: hidden;">I was hidden!</div>
+        <div id="videoContainer">        
+            <video id="video" width="320" height="240" controls style="display: none;">
+                <source src="video.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div id="svgContainer">
+            <svg height="250" width="500">
+                <polygon points="220,10 300,210 170,250 123,234" style="fill:lime;stroke:purple;stroke-width:1" />
+            </svg>
+        </div>
+
+
+    </div>
+
+    <script type="text/javascript" src="rStats.js"></script>
+    <script type="text/javascript" src="changeFunctions.js"></script>
+    <script type="text/javascript">
+
+        document.addEventListener('keydown', function (event) {
+
+            // http://keycode.info/
+            if (event.keyCode == 65) { // a
+                changeEverything((functionName, timeout) => {
+                    console.log("Executing " + functionName + " and waiting " + timeout + " ms");
+                });
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>rasterizeHTML raw</title>
+    <link rel="stylesheet" href="../base/css.css">
+</head>
+
+<body>
+
+    <div id="topContainer">
+
+        <!-- ideally, we would use an HTML-import statement here (see web components) but Firefox doesn't support this yet... --> 
+        <div id="container" style="width: 500px; border: 3px solid black; padding: 5px; float: left;">
+            <style> 
+
+            body {
+                background-color: white;
+            }
+
+            #textRight p {
+                font-size: 1.3em;
+                font-weight: bold;
+            }
+
+            #textRight p:nth-of-type(2)
+            {
+                background-color: #FF0000;
+            }
+            </style>
+            <div id="top">
+                <input id="textInput" type="text" value="initvalue" style="width: 100%;" /><br/>
+                <input id="checkboxInput" type="checkbox" value="initvalue">Checkbox input<br/>
+            </div>
+            <div id="center" style="width: 50%; border: 1px solid green;">
+                <div id="imageLeft" style="float: left; width: 30%; padding: 5px;">
+                    <!-- Chrome throws security errors if we keep the javascript eventhandler here... so let's remove it since it doesn't work in rasterizeHTML anyway-->
+                    <!--<img src="../base/webvr-logo-square.png" style="width: 100%; border: 1px solid red;" onclick="imageClicked()"/>-->
+                    <img src="../base/webvr-logo-square.png" style="width: 100%; border: 1px solid red;" />
+                </div>
+                <div id="textRight" style="float: left; border: 1px solid blue; padding: 5px;">
+                    <p id="paragraphOne">paragraph 1</p>
+                    <p>paragraph 2</p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div id="bottom">
+                <a href="http://google.com" target="_blank">google.com</a>
+            </div>
+            <div id="none" style="display: none;">I was not displayed!</div>
+            <div id="hidden" style="visibility: hidden;">I was hidden!</div>
+            <div id="videoContainer">        
+                <video id="video" width="320" height="240" controls style="display: none;">
+                    <source src="../base/video.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div id="svgContainer">
+                <svg height="250" width="500">
+                    <polygon points="220,10 300,210 170,250 123,234" style="fill:lime;stroke:purple;stroke-width:1" />
+                </svg>
+            </div>
+        </div>
+
+        <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 600px; min-height: 800px;">
+            <canvas id="drawingCanvas" width="600" height="800"></canvas>
+        </div>
+
+    </div>
+
+    <script type="text/javascript" src="../base/rStats.js"></script>
+    <script type="text/javascript" src="js/rasterizeHTML/rasterizeHTML.allinone.js"></script>
+    <script type="text/javascript" src="../base/changeFunctions.js"></script>
+    <script type="text/javascript">
+        
+        let constantUpdateLoop = true; // updates as much as possible, always. If false, only updates like this during animations
+        let idToRender = "container"; // "paragraphOne"
+        //let idToRender = "textRight";
+
+        let animateFreely = false;
+        let renderToCanvas = () => { 
+            //console.log("RenderToCanvas called");
+            rS('rasterizeHTML').start();
+
+
+            let canvas = document.getElementById("drawingCanvas");
+            // let ctx = canvas.getContext("2d");
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+            rasterizeHTML.drawDocument(document.getElementById( idToRender ), canvas, {clearBeforeDraw : true})
+                .then(function success(renderResult) {
+
+                    var timeSpent = rS('rasterizeHTML').end();
+
+                    console.log("Time spent drawing rasterizeHTML: " + timeSpent, renderResult);
+
+                    if( constantUpdateLoop || animateFreely )
+                        renderToCanvas();
+
+                }, function error(e) {
+                    console.error("RasterizeHTML failed ", e);
+                });
+        }
+
+        document.addEventListener('keydown', function (event) {
+            //let runningUpdater = undefined;
+
+            // http://keycode.info/
+            if (event.keyCode == 65) { // a
+                changeEverything((functionName, timeout) => {
+                    
+                    console.log("Executing " + functionName + " and waiting " + timeout + " ms");
+
+                    /*
+                    if( runningUpdater )
+                    {
+                        clearInterval( runningUpdater );
+                        runningUpdater = undefined;
+                    }
+                    
+                    if( functionName.indexOf("animate") >= 0 || functionName.indexOf("Video") >= 0 )
+                    {
+                        runningUpdater = setInterval( renderToCanvas, 500 ); //40 ); // 40ms = 25fps, 250ms = 4fps
+                    }
+                    else
+                        setTimeout(renderToCanvas, timeout * 0.5); // wait a little longer to make sure the DOM rendering has had a chance to update
+                    */
+                    
+                    if( !constantUpdateLoop )
+                    {
+                        if( functionName.indexOf("animate") >= 0 || functionName.indexOf("Video") >= 0 )
+                        {
+                            animateFreely = true;
+                        }
+                        else
+                        {
+                            animateFreely = false;
+                            setTimeout(renderToCanvas, timeout * 0.5); // wait a little longer to make sure the DOM rendering has had a chance to update
+                        }
+                    }
+                });
+            }
+        });
+
+        renderToCanvas();
+
+    </script>
+
+</body>
+
+</html>

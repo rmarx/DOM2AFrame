@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Dom2Aframe</title>
+    <link rel="stylesheet" href="../base/css.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+    <style>
+        #container{
+            font-family: "Roboto", sans-serif;
+        }
+
+        #container p {
+            font-weight: normal;
+            color: #000000;
+        }
+
+    </style>
+
+    <!-- A-frame -->
+    <script type="text/javascript" src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+
+    <!-- A-frame components -->
+    <script type="text/javascript" src="https://rawgit.com/oscarmarinmiro/aframe-video-controls/master/dist/aframe-video-controls.min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/oscarmarinmiro/aframe-stereo-component/master/dist/aframe-stereo-component.min.js"></script>
+
+</head>
+
+<body>
+
+    <div id="topContainer">
+
+        <!-- ideally, we would use an HTML-import statement here (see web components) but Firefox doesn't support this yet... --> 
+        <div id="container" style="width: 500px; border: 3px solid black; padding: 5px; float: left;">
+            <div id="top">
+                <input id="textInput" type="text" value="initvalue" style="width: 100%;" /><br/>
+                <input id="checkboxInput" type="checkbox" value="initvalue">Checkbox input<br/>
+            </div>
+            <div id="center" style="width: 50%; border: 1px solid green;">
+                <div id="imageLeft" style="float: left; width: 30%; padding: 5px;">
+                    <img src="../base/webvr-logo-square.png" style="width: 100%; border: 1px solid red;" onclick="imageClicked()"/>
+                </div> 
+                <div id="textRight" style="float: left; border: 1px solid blue; padding: 5px;">
+                    <p id="paragraphOne">Paragraph 1<!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae dui tristique est ultricies rhoncus. Nam justo neque, sollicitudin ac volutpat eu, auctor at lorem. Nulla porta risus nulla. Aenean vitae eleifend est. Fusce at egestas ex. Phasellus eu malesuada lectus, sed consequat lacus. Donec imperdiet placerat consectetur. Nunc pretium eleifend diam malesuada condimentum. Proin in vehicula elit. Fusce non mauris odio. Nulla facilisi. Morbi bibendum nisi eget leo viverra fringilla. Duis elit arcu, efficitur sit amet tempor et, volutpat et augue. Sed condimentum ullamcorper nulla, eu blandit ligula elementum eget. Etiam ut mauris scelerisque mi sollicitudin dictum.--></p>
+                    <p>paragraph 2</p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div id="bottom">
+                <a href="http://google.com" target="_blank">google.com</a>
+            </div>
+            <div id="none" style="display: none;">I was not displayed!</div>
+            <div id="hidden" style="visibility: hidden;">I was hidden!</div>
+            <div id="videoContainer">        
+                <video id="video" width="320" height="240" controls style="display: none;">
+                    <source src="../base/video.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div id="svgContainer">
+                <svg height="250" width="500">
+                    <polygon points="220,10 300,210 170,250 123,234" style="fill:lime;stroke:purple;stroke-width:1" />
+                </svg>
+            </div>
+        </div>
+
+        <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 600px; min-height: 600px; padding: 3px;">
+            <!--<canvas width="600" height="800"></canvas>-->
+            <a-scene embedded stats="true" style="width: 600px; height: 600px">
+                <a-box color="red" position="0 12 -19" rotation="0 45 45" scale="1 1 1"></a-box>
+                <a-text value="ROBIN TEST" color="red" position="-5 12 -18" width="50"></a-text>
+                <a-box color="red" position="5 12 -19" rotation="0 45 45" scale="2 2 2"></a-box>
+                
+                <a-plane id="fullBox" color="green" position="0 0 -21" scale="20 20" visible="false"></a-plane>
+                <!--<a-box id="fullBox" color="green" position="0 0 -21" scale="15 15 5" visible="false"></a-plane>
+                
+                <a-entity>
+                    <a-camera position="0 0 0" far="90" near="0.5" stereocam="eye:left;" wasd-controls-enabled="true" />
+                </a-entity>
+                -->
+            </a-scene> 
+        </div>
+
+    </div>
+
+    <!-- A-frame "conveniently" pulls in their own rs-base classes and adds it in the head dynamically... *sigh* -->
+    <style>
+        .rs-base{
+            position: absolute;
+            z-index: 10000;
+            padding: 10px;
+            background-color: #222;
+            font-size: 10px;
+            line-height: 1.2em;
+            width: 350px;
+            font-family: 'Roboto Condensed', tahoma, sans-serif;
+            right: 0;
+            left: unset;
+            top: 0;
+            overflow: hidden;
+        }
+    </style>
+
+
+    <script type="text/javascript" src="../base/rStats.js"></script>
+   <!-- <script type="text/javascript" src="js/dom2aframe/dom2aframe_v1.js"></script> -->
+    <script type="text/javascript" src="js/dom2aframe/elements/BaseElement.js"></script>
+    <script type="text/javascript" src="js/dom2aframe/elements/ContainerElement.js"></script>
+    <script type="text/javascript" src="js/dom2aframe/elements/ImageElement.js"></script>
+    <script type="text/javascript" src="js/dom2aframe/elements/TextElement.js"></script>
+    <script type="text/javascript" src="js/dom2aframe/DOM2AFrameSettings.js"></script>
+    <script type="text/javascript" src="js/dom2aframe/DOM2AFrame.js"></script>
+    <script type="text/javascript" src="js/dom2aframe/a-video-bundle.js"></script>
+    <!--<script type="text/javascript" src="js/html2canvas/html2canvas.svg.js"></script>-->
+    <script type="text/javascript" src="../base/changeFunctions.js"></script>
+    <script type="text/javascript">
+        
+        let constantUpdateLoop = false; // updates as much as possible, always. If false, only updates like this during animations
+        //let idToRender = "paragraphOne";
+        let idToRender = "container"; 
+
+        
+        let animateFreely = false;
+        let renderToCanvas = () => { 
+            return;
+            /*
+            //console.log("RenderToCanvas called");
+            rS('html2canvas').start();
+            html2canvas( document.getElementById( idToRender ), {
+                onrendered: function(canvas) {
+                    //console.log("html2canvas is done!", canvas);
+                    let canvasContainer = document.getElementById("canvasContainer");
+                    canvasContainer.innerHTML = "";
+                    canvasContainer.append(canvas);
+                    var timeSpent = rS('html2canvas').end();
+
+                    console.log("Time spent drawing html2canvas: " + timeSpent + " -> ", window.performance.memory );
+                    
+                    if( constantUpdateLoop || animateFreely )
+                        renderToCanvas();
+                }
+            });
+            */
+        }
+        
+
+        document.addEventListener('keydown', function (event) {
+            //let runningUpdater = undefined;
+
+            // http://keycode.info/
+            if (event.keyCode == 65) { // a
+                changeEverything((functionName, timeout) => {
+                    
+                    console.log("Executing " + functionName + " and waiting " + timeout + " ms");
+                    
+                    if( !constantUpdateLoop )
+                    {
+                        if( functionName.indexOf("animate") >= 0 || functionName.indexOf("Video") >= 0 )
+                        {
+                            animateFreely = true;
+                        }
+                        else
+                        {
+                            animateFreely = false;
+                            setTimeout(renderToCanvas, timeout * 0.5); // wait a little longer to make sure the DOM rendering has had a chance to update
+                        }
+                    }
+                });
+            }
+        });
+
+        renderToCanvas();
+
+        //dom2aframe_init(document.body);//idToRender); // TODO: re-enable this to prevent it from taking full document as target! 
+       // dom2aframe_init( document.getElementById("container") ); // TODO: re-enable this to prevent it from taking full document as target! 
+
+       const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container") );
+       DOM2AFrame1.Init();
+
+    </script> 
+
+</body>
+
+</html>

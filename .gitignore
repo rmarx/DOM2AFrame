@@ -1,0 +1,11 @@
+.git/
+
+framework_comparisons/pixelCommander/js/html-gl/lib/node_modules/*
+!framework_comparisons/pixelCommander/js/html-gl/lib/node_modules/html-gl/
+framework_comparisons/pixelCommander/js/html-gl/lib/node_modules/html-gl/bower_components/*
+framework_comparisons/pixelCommander/js/html-gl/lib/node_modules/html-gl/node_modules/*
+
+
+framework_comparisons/rasterizeHTML/js/rasterizeHTML/lib/node_modules/*
+!framework_comparisons/rasterizeHTML/js/rasterizeHTML/lib/node_modules/rasterizeHTML/
+framework_comparisons/rasterizeHTML/js/rasterizeHTML/lib/node_modules/rasterizeHTML/node_modules/*
