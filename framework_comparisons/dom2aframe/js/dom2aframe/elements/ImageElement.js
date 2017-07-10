@@ -1,6 +1,6 @@
 class ImageElement extends Element{
-	constructor(DOM2AFrame, domelement, depth){
-		super(DOM2AFrame, domelement, depth);
+	constructor(DOM2AFrame, domelement, depth, registerEvents = true){
+		super(DOM2AFrame, domelement, depth, registerEvents);
 
 		//Image asset creation
 		this.asset = this.domelement.cloneNode(true);
@@ -13,10 +13,15 @@ class ImageElement extends Element{
         this.aelement.setAttribute("id", "IMAGE_" + asset_id);
 		this.aelement.setAttribute("src","#"+asset_id);
 
-        console.warn("Created Image asset with source", asset_id, this.aelement, this.DOM2AFrame.AFrame.assets);
+        //console.warn("Created Image asset with source", asset_id, this.aelement, this.DOM2AFrame.AFrame.assets);
+
+		
 
 		//Initiation update
 		//this.update(true);
+		
+		if( registerEvents )
+			this.SetupEventHandlers();
 	}
 
 	ElementSpecificUpdate(element_style){

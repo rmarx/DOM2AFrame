@@ -93,25 +93,52 @@ class Element{
 
         this.children = new Set();
 
-        //Listenes for direct css changes
-        // note: attributeOldValue doesn't seem to work for style updates... chucks
-		this.mutationObserver = new MutationObserver(this.HandleMutation.bind(this));
-        this.mutationObserver.observe( this.domelement, { attributes: true, childList: true,   characterData: true, subtree: false /*, attributeOldValue : true*/ });
-		//(new MutationObserver(this.DOM2AFrame.UpdateAll.bind(this.DOM2AFrame))).observe(    this.domelement, { attributes: true, childList: false,  characterData: true, subtree: false });
-
-        //Listenes for css animations
-        //this.domelement.addEventListener("animationstart",  this.StartAnimation.bind(this));
-        //this.domelement.addEventListener("animationend",    this.StopAnimation.bind(this));
-
-        //Listenes for transition changes, only works on Microsoft Edge
-        this.domelement.addEventListener("transitionstart", this.StartAnimation.bind(this));
-        this.domelement.addEventListener("transitionend",   this.StopAnimation.bind(this));
-
         this.position = new Position( this.domelement.getBoundingClientRect(), layer, this.DOM2AFrame.settings.DOMPixelsPerUnit );
 
         //Flag for when we need to redraw
         this._dirty = false;
 	}
+
+    // supposed to be called in the ctor of inheriting elements after their .aelement has been assigned
+    SetupEventHandlers()
+    {
+        if( !this.aelement ){
+            alert("BaseElement:SetupEventHandlers : requires .aelement to be assigned!");
+            return;
+        }
+
+        this.mouseEventHandler = new MouseEventHandler(this);
+
+        //Listenes for direct css changes
+        // note: attributeOldValue doesn't seem to work for style updates... chucks
+        this.mutationObserver = new MutationObserver(this.HandleMutation.bind(this));
+        this.mutationObserver.observe( this.domelement, { attributes: true, childList: true,   characterData: true, subtree: false /*, attributeOldValue : true*/ });
+        //(new MutationObserver(this.DOM2AFrame.UpdateAll.bind(this.DOM2AFrame))).observe(    this.domelement, { attributes: true, childList: false,  characterData: true, subtree: false });
+
+        //Listenes for css animations
+        //this.domelement.addEventListener("animationstart",  this.StartAnimation.bind(this));
+        //this.domelement.addEventListener("animationend",    this.StopAnimation.bind(this));
+
+
+        this.domelement.addEventListener("eventListenerAdded", this.HandleEventListenerAdded.bind(this));
+        this.domelement.addEventListener("eventListenerRemoved", this.HandleEventListenerRemoved.bind(this));
+
+        //Listenes for transition changes, only works on Microsoft Edge
+        this.domelement.addEventListener("transitionstart", this.StartAnimation.bind(this));
+        this.domelement.addEventListener("transitionend",   this.StopAnimation.bind(this));
+
+        this.mouseEventHandler._resync(); // perform the initial sync to pick-up mouse handlers that might have been registered before this element // TODO: maybe move this to MouseEventHandler ctor instead?
+    }
+
+    HandleEventListenerAdded(evt){
+        //console.log("HandleEventListenerAdded", this, evt.detail, evt.target.eventListenerList);
+        this.mouseEventHandler.HandleListenersAdded(evt);
+    }
+
+    HandleEventListenerRemoved(evt){
+        //console.log("HandleEventListenerRemoved", this, evt.detail, evt.target.eventListenerList);
+        this.mouseEventHandler.HandleListenersRemoved(evt);
+    }
 
     StartAnimation(evt){
         console.log("ANIMATION STARTED", (evt.target == this.domelement), evt);

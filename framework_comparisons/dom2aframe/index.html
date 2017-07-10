@@ -19,6 +19,8 @@
 
     </style>
 
+    <script type="text/javascript" src="js/eventListenerListPlugin.js"></script>
+
     <!-- A-frame -->
     <script type="text/javascript" src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
 
@@ -40,7 +42,7 @@
             </div>
             <div id="center" style="width: 50%; border: 1px solid green;">
                 <div id="imageLeft" style="float: left; width: 30%; padding: 5px;">
-                    <img src="../base/webvr-logo-square.png" style="width: 100%; border: 1px solid red;" onclick="imageClicked()"/>
+                    <img src="../base/webvr-logo-square.png" style="width: 100%; border: 1px solid red;" onclick="imageClicked(event)"/>
                 </div> 
                 <div id="textRight" style="float: left; border: 1px solid blue; padding: 5px;">
                     <p id="paragraphOne">Paragraph 1<!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae dui tristique est ultricies rhoncus. Nam justo neque, sollicitudin ac volutpat eu, auctor at lorem. Nulla porta risus nulla. Aenean vitae eleifend est. Fusce at egestas ex. Phasellus eu malesuada lectus, sed consequat lacus. Donec imperdiet placerat consectetur. Nunc pretium eleifend diam malesuada condimentum. Proin in vehicula elit. Fusce non mauris odio. Nulla facilisi. Morbi bibendum nisi eget leo viverra fringilla. Duis elit arcu, efficitur sit amet tempor et, volutpat et augue. Sed condimentum ullamcorper nulla, eu blandit ligula elementum eget. Etiam ut mauris scelerisque mi sollicitudin dictum.--></p>
@@ -102,9 +104,10 @@
         }
     </style>
 
-
+    <!-- TODO: bundle everything up with webpack or something instead of including separate files -->
     <script type="text/javascript" src="../base/rStats.js"></script>
    <!-- <script type="text/javascript" src="js/dom2aframe/dom2aframe_v1.js"></script> -->
+    <script type="text/javascript" src="js/dom2aframe/helpers/MouseEventHandler.js"></script>
     <script type="text/javascript" src="js/dom2aframe/elements/BaseElement.js"></script>
     <script type="text/javascript" src="js/dom2aframe/elements/ContainerElement.js"></script>
     <script type="text/javascript" src="js/dom2aframe/elements/ImageElement.js"></script>

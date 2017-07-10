@@ -1,10 +1,13 @@
 class ContainerElement extends Element{
-	constructor(DOM2AFrame, domelement, depth){
-		super(DOM2AFrame, domelement, depth);
+	constructor(DOM2AFrame, domelement, depth, registerEvents = true){
+		super(DOM2AFrame, domelement, depth, registerEvents);
 
 		this.aelement = document.createElement("a-plane");
         //this.aelement.setAttribute("wireframe", true);
 		//this.update(true);
+
+		if( registerEvents )
+			this.SetupEventHandlers();
 	}
 
 	ElementSpecificUpdate(element_style){

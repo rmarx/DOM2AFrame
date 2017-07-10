@@ -181,8 +181,9 @@
 
 
         
-        function imageClicked(){
-            alert("Image was clicked!");
+        function imageClicked(evt){
+            alert("Image was clicked! via .onclick handler in DOM");
+            console.log("Image was clicked! via .onclick handler in DOM", evt);
         }
 
         //(function(){console.log("STATS!");var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.showPanel( 0 );document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='http://rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();

@@ -1,3 +1,5 @@
+
+
 // TODO: colorify : https://stackoverflow.com/questions/7505623/colors-in-javascript-console
 // Doesn't work... of course shows these lines as the originating lines... typical
 //console.debug   = function(){ console.log(arguments); }
@@ -25,7 +27,7 @@ class DOM2AFrame{
 
         this.state = {};
         this.state.updateAll    = true;
-        this.state.requestedFPS = 999;
+        this.state.requestedFPS = 60;
         this.state.dirty        = false; // if anything is dirty in the whole scene: means we should check everything for changes
         this.state.acceptTreeMutations = true; // whether we accept changes in the trees 
         this.state._nextAssetID  = -1; // should be incremented each time we use this! 
@@ -152,7 +154,7 @@ class DOM2AFrame{
 
         //Assets
         this.AFrame.assets = document.createElement("a-assets");
-        this.AFrame.assets.innerHTML = '<video id="iwb" autoplay="false" loop="true" src="city-4096-mp4-30fps-x264-ffmpeg.mp4"></video>';
+        this.AFrame.assets.innerHTML = '<video id="iwb" autoplay="false" loop="true" src="../base/videoSTEREO.mp4"></video>';
         this.AFrame.scene.appendChild(this.AFrame.assets);
 
         //Container for all the generated elements
@@ -218,9 +220,8 @@ class DOM2AFrame{
         //cursor.setAttribute("fuse",true);
         cursor.setAttribute("fuse-timeout", 500);
         cursor.setAttribute("color", "green");
-        cursor.setAttribute("raycaster", "objects: .clickable; far: 90;")
+        cursor.setAttribute("raycaster", "far: "+cameraFar+";");//"objects: .clickable; far: "+cameraFar+";");
         this.AFrame.camera.appendChild(cursor);
-        
 
 
 
@@ -291,7 +292,7 @@ class DOM2AFrame{
 
         var self = this;
         //Observer to check for newly added or deleted DOM elements
-        var observer = new WebKitMutationObserver(function (mutations) {
+        var observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
                 if (self.state.acceptTreeMutations) {
                     for (var i = 0; i < mutation.addedNodes.length; i++) {
@@ -340,6 +341,8 @@ document.onkeydown = checkKey;
 function checkKey(e) {
 
     e = e || window.event;
+
+    console.log("key pressed", e);
 
     //press E or A to go up and down. 
     //press P to show video
@@ -395,6 +398,22 @@ function checkKey(e) {
             isVisible = false;
 
         document.getElementById("fullBox").setAttribute("visible", !isVisible );
+    }
+    else if( e.keyCode == '67' ){ // c
+        /*
+        console.log("Adding click events to paragraphOne");
+        document.getElementById("paragraphOne").addEventListener("click", () => { alert("Paragraph one clicked via addEventListener!"); });
+        //document.getElementById("paragraphOne").onclick = () =>  { alert("Paragraph one clicked via .onclick!"); };
+        document.getElementById("paragraphOne").setAttribute("onclick", () =>  { alert("Paragraph one clicked via setAttribute!"); } );
+        */
+
+        //document.getElementById("paragraphOne").innerHTML = "INNERHTML change leads to mutationRecord?";
+
+        let clickHandler = () => { alert("imageLeft clicked! From a-frame!"); document.getElementById("imageLeft").removeEventListener('click', clickHandler); };
+        document.getElementById("imageLeft").addEventListener("click", clickHandler );
+        
+        let mousedownHandler = () => { console.log("imageLeft mousedown! From a-frame!"); document.getElementById("imageLeft").removeEventListener('mousedown', mousedownHandler); };
+        document.getElementById("imageLeft").addEventListener("mousedown", mousedownHandler );
     }
 
 }

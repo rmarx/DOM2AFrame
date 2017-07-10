@@ -8,8 +8,8 @@ function stripText(html){
 
 
 class TextElement extends Element{
-	constructor(DOM2AFrame, domelement, depth){
-		super(DOM2AFrame, domelement, depth);
+	constructor(DOM2AFrame, domelement, depth, registerEvents = true){
+		super(DOM2AFrame, domelement, depth, registerEvents);
 
         // note, for text elements we want to build a compound setup to allow for background colors for the entity (in a-frame, something cannot have a background-color)
         // there are several ways to do this in a-frame, including an option to do it in a single tag:
@@ -26,14 +26,13 @@ class TextElement extends Element{
         this.aelement = document.createElement("a-entity");
 
 		//Make separate container and text element
-		this.backgroundPlane = new ContainerElement(DOM2AFrame, domelement, depth - (this.DOM2AFrame.settings.layerStepSize/2));
+		this.backgroundPlane = new ContainerElement(DOM2AFrame, domelement, depth - (this.DOM2AFrame.settings.layerStepSize/2), false); // background shouldn't register events, only our main a-text element (otherwise the same DOMElement would get double the events)
 		this.atext = document.createElement("a-text");// new TextElement(domelement, depth);
 
 		//Add container and text to this entity
 		this.aelement.appendChild(this.backgroundPlane.AElement );
 		this.aelement.appendChild(this.atext );
 
-        this.backgroundPlane.mutationObserver.disconnect(); // otherwhise we would get mutations on our domelement twice, once for the Text and once for the Container 
         this.children.add( this.backgroundPlane  );
 
         this.atext.setAttribute("align", "left"); 
@@ -41,6 +40,9 @@ class TextElement extends Element{
 
         //this.aelement.setAttribute("width", "auto");
         //this.aelement.setAttribute("height", "auto");
+		
+		if( registerEvents )
+			this.SetupEventHandlers();
     }
 
 	ElementSpecificUpdate(element_style){
