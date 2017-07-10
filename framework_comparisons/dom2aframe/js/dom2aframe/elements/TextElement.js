@@ -40,9 +40,19 @@ class TextElement extends Element{
 
         //this.aelement.setAttribute("width", "auto");
         //this.aelement.setAttribute("height", "auto");
+
+		//this.aelement = this.atext; // TODO: figure out repercussions! done this to get mouse events working! 
 		
+		//this.backgroundPlane.AElement.addEventListener("mouseenter", (evt) => { console.log("TextElement mouseenter!", this.domelement); });
+
 		if( registerEvents )
 			this.SetupEventHandlers();
+
+		if( this.domelement.tagName == "A" ){
+			// custom logic needed for an anchor
+			// we just want to trigger a click event, so need to register a dummy click handler
+			this.domelement.addEventListener("click", (evt) => { console.log("Link clicked!", this.domelement.getAttribute("href"), this.domelement); })
+		}
     }
 
 	ElementSpecificUpdate(element_style){
@@ -50,7 +60,7 @@ class TextElement extends Element{
 		// note: updating the backgroundPlane is done automatically because it is registered as a child of this element. We only need to deal with our own stuff here
         // note that children are updated before their parent, so we might override some stuff for the backgroundPlane here if we would need to
 		
-		console.log("ElementSpecificUpdate TEXT ");
+		//console.log("ElementSpecificUpdate TEXT ");
 
         // need to do custom positioning here because anchoring text elements doesn't work properly (i.e. anchor center (as is default for other objects) and text-align left shifts the text way too far to the left)
         // so we set our anchor to left and offset our calculated center-position (see the Position class) to account for this for correct positioning

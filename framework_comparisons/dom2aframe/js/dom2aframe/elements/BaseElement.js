@@ -214,13 +214,13 @@ class Element{
         if(this.position.EqualsDOMPosition(DOMPosition) && !this.dirty && !forceUpdate)
             return;
 
-        console.log("UPDATE TRIGGERED ", (this.position.EqualsDOMPosition(DOMPosition)), this.dirty, forceUpdate, this.domelement);
+        //console.log("UPDATE TRIGGERED ", (this.position.EqualsDOMPosition(DOMPosition)), this.dirty, forceUpdate, this.domelement);
 
         //Cache the last position
         this.position.UpdateFromDOMPosition(DOMPosition);
+        
 
         var element_style = window.getComputedStyle(this.domelement);
-        this.ElementSpecificUpdate(element_style);
 
         //Set the opacity of the element
         var new_opacity = 0;
@@ -228,6 +228,9 @@ class Element{
             new_opacity = parseFloat(element_style.getPropertyValue("opacity"));
     	//this.aelement.setAttribute("opacity", "");
     	this.aelement.setAttribute("opacity", new_opacity);
+
+        
+        this.ElementSpecificUpdate(element_style);
 
 
 

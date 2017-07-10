@@ -54,7 +54,7 @@
     node._removeEventListener(type, handle, useCapture);
     node.eventListenerList[type] = node.eventListenerList[type].filter(
       function(listener){
-        return listener.handle.toString() !== handle.toString();
+        return listener && listener.handle && handle && (listener.handle.toString() !== handle.toString()); // native event listener API supports empty handles/listeners, but .toString obviously doesn't
       }
     )
   

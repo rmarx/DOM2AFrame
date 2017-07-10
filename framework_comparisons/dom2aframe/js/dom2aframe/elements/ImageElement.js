@@ -25,7 +25,8 @@ class ImageElement extends Element{
 	}
 
 	ElementSpecificUpdate(element_style){
-		console.log("ElementSpecificUpdate IMAGE ");
+		//console.log("ElementSpecificUpdate IMAGE ");
+		
 		var width = this.position.width;
 		var height = this.position.height;
 
