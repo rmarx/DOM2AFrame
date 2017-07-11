@@ -53,6 +53,18 @@ body {
                  0 0 4px #fff;
 }
 
+
+
+table, th, td{
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+td{
+    padding: 5px;
+}
+
+
 .rs-base{
     position: absolute;
     z-index: 10000;
@@ -61,7 +73,7 @@ body {
     font-size: 10px;
     line-height: 1.2em;
     width: 350px;
-    font-family: 'Roboto Condensed', tahoma, sans-serif;
+    font-family: 'Roboto Condensed', tahoma, sans-serif; 
     right: 0;
     top: 0;
     overflow: hidden;
