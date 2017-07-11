@@ -112,7 +112,7 @@ class Element{
         //Listenes for direct css changes
         // note: attributeOldValue doesn't seem to work for style updates... chucks
         this.mutationObserver = new MutationObserver(this.HandleMutation.bind(this));
-        this.mutationObserver.observe( this.domelement, { attributes: true, childList: true,   characterData: true, subtree: false /*, attributeOldValue : true*/ });
+        this.mutationObserver.observe( this.domelement, { attributes: true, childList: false,   characterData: true, subtree: false /*, attributeOldValue : true*/ });
         //(new MutationObserver(this.DOM2AFrame.UpdateAll.bind(this.DOM2AFrame))).observe(    this.domelement, { attributes: true, childList: false,  characterData: true, subtree: false });
 
 
@@ -123,7 +123,7 @@ class Element{
         //Listenes for css animations
         this.domelement.addEventListener("animationstart",  this.StartAnimation.bind(this));
         this.domelement.addEventListener("animationend",    this.StopAnimation.bind(this));
-        
+
         //Listenes for transition changes, only works on Microsoft Edge
         this.domelement.addEventListener("transitionstart", this.StartAnimation.bind(this));
         this.domelement.addEventListener("transitionend",   this.StopAnimation.bind(this));

@@ -9,8 +9,8 @@ class DOM2AFrameSettings {
         this.layerStepSize = 0.001; // z-space between the layers 
 
         this.ignoreElementTags      = new Set(["BR", "SOURCE"]);
-        this.containerElementTags   = new Set(["DIV", "SECTION", "BODY"]);
-        this.textElementTags        = new Set(["P", "SPAN", "H1", "H2", "H3", "H4", "H5", "H6", "BUTTON", "A"]);
+        this.containerElementTags   = new Set(["DIV", "SECTION", "BODY", "TABLE", "TR"]);
+        this.textElementTags        = new Set(["P", "SPAN", "H1", "H2", "H3", "H4", "H5", "H6", "BUTTON", "A", "TD", "TH"]);
         this.imageElementTags       = new Set(["IMG"]);
 
         this.transparantColor       = undefined; // if undefined, will be calculated automatically

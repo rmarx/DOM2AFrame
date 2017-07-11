@@ -58,19 +58,11 @@ class TextElement extends Element{
 	ElementSpecificUpdate(element_style){
 
 		// note: updating the backgroundPlane is done automatically because it is registered as a child of this element. We only need to deal with our own stuff here
-        // note that children are updated before their parent, so we might override some stuff for the backgroundPlane here if we would need to
+        // note that children are fully updated before their parent, so we might override some stuff for the backgroundPlane here if we would need to
 		
 		//console.log("ElementSpecificUpdate TEXT ");
 
-        // need to do custom positioning here because anchoring text elements doesn't work properly (i.e. anchor center (as is default for other objects) and text-align left shifts the text way too far to the left)
-        // so we set our anchor to left and offset our calculated center-position (see the Position class) to account for this for correct positioning
-        // TODO: FIXME: Take into account other text-align settings
-		let xyz = this.position.xyz;
-		let anchor = this.atext.getAttribute("anchor"); 
-		if( anchor == "left" )
-			xyz.x -= this.position.width / 2; // shift to the left to comply with the text anchor
-
-        this.atext.setAttribute("position", xyz );
+		this._UpdateTextAlignment(element_style);
 
         this.atext.setAttribute("text", "value: " + stripText(this.domelement.innerHTML) + ";");
 
@@ -91,54 +83,103 @@ class TextElement extends Element{
         }
 
 
-        var textSizeInPixels = 1 / this.DOM2AFrame.settings.DOMPixelsPerUnit; 
 
+
+		// we want to update text size, but this depends on if the font is loaded by this time or not (is an async operation)
+		// getAttribute("text") doesn't give us access to the internal component data
+		// .components["text"] does! w00t!
+		let currentFont = this.atext.components["text"].currentFont;
+		if( !currentFont ) 
+		{
+			let self = this;
+			let handler = () => { self.atext.removeEventListener(handler); self._UpdateTextSize(element_style); };
+			this.atext.addEventListener("textfontset", handler);
+		}
+		else
+		{
+			this._UpdateTextSize(element_style);
+		}
+
+
+	}
+
+	_UpdateTextAlignment(element_style){
+
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/text-align
+		let alignment = element_style.getPropertyValue("text-align");
+		let anchor = "left";
+		if( alignment == "center" )
+			anchor = "center";
+		else if( alignment == "right" )
+			anchor = "right";
+		else if( alignment == "left" )
+			anchor = "left";
+		else if(alignment == "start") // same as left if text-direction is left-to-right (which we assume for now) TODO: support right-to-left
+			anchor = "left";
+		else if( alignment == "end" ) // same as right if text-direction is left-to-right (which we assume for now) TODO: support right-to-left
+			anchor = "right";
+		else{
+			anchor = "left";
+			console.warn("TextElement:_UpdateTextAlignment : unsupported text alignment! ", alignment, this.domelement);
+		}
+
+		this.atext.setAttribute("anchor", anchor);
+		this.atext.setAttribute("align", alignment);
+
+        // need to do custom positioning here because anchoring text elements doesn't work properly (i.e. anchor center (as is default for other objects) and text-align left shifts the text way too far to the left)
+        // so if we set our anchor to left and offset our calculated center-position (see the Position class), we account for this with correct positioning
+ 
+		let xyz = this.position.xyz;
+		if( anchor == "left" )
+			xyz.x -= this.position.width / 2; // shift to the left to comply with the text anchor
+		else if( anchor == "right" )
+			xyz.x += this.position.width / 2; // shift to the right
+		// if center, nothing to be done! 
+
+        this.atext.setAttribute("position", xyz );
+	}
+
+	_UpdateTextSize(element_style){
+
+		let currentFont = this.atext.components["text"].currentFont;
+		let referenceFontSize = currentFont.info.size; // the base fontsize A-Frame will use to determine wrapping
+
+		// calculated font size is always in pixels! w00t!
+		let actualFontSize = parseFloat(element_style.getPropertyValue("font-size"));
+		let fontScalingFactor = referenceFontSize / actualFontSize; // if actual > reference, this will be < 1, > 1 otherwhise 
+
+		let widthInPixels = this.position.width / this.position.DOM2AFrameScalingFactor;
+		let wrapPixels = widthInPixels * fontScalingFactor;
+		wrapPixels *= 1.05; // for some reason there is still a slight discrepancy with our calculations. This is needed to get at least single-line text to not wrap at the end... MAGIC NUMBER!
+		
+		this.atext.setAttribute("wrap-pixels", wrapPixels);
+		this.atext.setAttribute( "width", this.position.width);
+		
+		//console.warn("Set wrappixels to ", wrapPixels, widthInPixels, fontScalingFactor, this.position.DOM2AFrameScalingFactor, this.position.width, actualFontSize, currentFont.info);
+
+        //var textSizeInPixels = 1 / this.DOM2AFrame.settings.DOMPixelsPerUnit;  
+
+		/*
         // TODO: explain this calculation
         var width = (textSizeInPixels * parseFloat(element_style.getPropertyValue("font-size"))) *22;//* 20;
         if(width != this.atext.getAttribute("width"))
 		{
         	this.atext.setAttribute("width",width);
 		}
+		*/
 
-	}
+		//this.atext.setAttribute( "width", this.position.width );
 
-    /*
-class ButtonElement extends Element{
-	constructor(domelement, depth){
-		super(domelement, depth);
-
-		this.aelement = document.createElement("a-entity");
-
-		//Make separate container and text element
-		this.aplane = new ContainerElement(domelement, depth - 0.0005);
-		this.atext = new TextElement(domelement, depth);
-
-		//Add container and text to this entity
-		this.aelement.appendChild(this.aplane.getAElement());
-		this.aelement.appendChild(this.atext.getAElement());
-
-		//Make shure these are clickable by the raycaster
-		this.aelement.classList.add('clickable');
-
-		this.aelement.setAttribute("onclick", this.domelement.getAttribute("onclick"));
-		//this.aplane.update(true);
-		//this.atext.update(true);
-		//this.update(true);
-	}
-
-	clickElement(){
-		this.domelement.click();
-	}
-
-	elementSpecificUpdate(element_style){
-		console.log("ElementSpecificUpdate BUTTON ");
-		// if we come here, it means the top-level element was update with 100% surety (checked in the calling update())
-		// so we have to force update the children as well
-		// not doing this leads to the children not being updated at component ADD time either... 
-		// TODO: find a better overall flow for this
-		this.aplane.update(true); 
-		this.atext.update(true);
-	}
-}
-*/
+		// https://github.com/aframevr/aframe/blob/60a440cc5070a0ce95d5e4efcf2c3b5e108cbd25/src/components/text.js
+		// https://github.com/Jam3/three-bmfont-text 
+		// https://github.com/Jam3/layout-bmfont-text 
+		// https://www.npmjs.com/package/word-wrapper
+		
+			/*
+			console.warn("current wrapPixels was : ", this.atext.getAttribute("wrapPixels") );
+			//this.atext.setAttribute("wrapPixels", widthInPixels);
+			this.atext.setAttribute("wrap-pixels", widthInPixels);
+			console.warn("Set wrappixels to ", widthInPixels, this.position.width);
+			*/
+	};
 }
