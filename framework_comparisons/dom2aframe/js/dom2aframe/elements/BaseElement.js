@@ -115,14 +115,15 @@ class Element{
         this.mutationObserver.observe( this.domelement, { attributes: true, childList: true,   characterData: true, subtree: false /*, attributeOldValue : true*/ });
         //(new MutationObserver(this.DOM2AFrame.UpdateAll.bind(this.DOM2AFrame))).observe(    this.domelement, { attributes: true, childList: false,  characterData: true, subtree: false });
 
-        //Listenes for css animations
-        //this.domelement.addEventListener("animationstart",  this.StartAnimation.bind(this));
-        //this.domelement.addEventListener("animationend",    this.StopAnimation.bind(this));
 
 
         this.domelement.addEventListener("eventListenerAdded", this.HandleEventListenerAdded.bind(this));
         this.domelement.addEventListener("eventListenerRemoved", this.HandleEventListenerRemoved.bind(this));
 
+        //Listenes for css animations
+        this.domelement.addEventListener("animationstart",  this.StartAnimation.bind(this));
+        this.domelement.addEventListener("animationend",    this.StopAnimation.bind(this));
+        
         //Listenes for transition changes, only works on Microsoft Edge
         this.domelement.addEventListener("transitionstart", this.StartAnimation.bind(this));
         this.domelement.addEventListener("transitionend",   this.StopAnimation.bind(this));

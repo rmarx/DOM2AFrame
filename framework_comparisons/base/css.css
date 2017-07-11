@@ -39,6 +39,17 @@ body {
 	background-color: #FF0000;
 }
 
+#imageRounded p
+{
+    border-radius: 25px;
+    border: 2px solid red;
+    background-image: url("webvr-logo-square.png");
+    background-position: left top;
+    background-repeat: repeat;
+    background-size: cover;
+    padding: 25px;
+}
+
 
 .alarm{
     color: #b70000;

@@ -34,6 +34,16 @@
                 <div id="bottom">
                     <a href="http://google.com" target="_blank">google.com</a>
                 </div>
+                <div id="center2" style="width: 100%; border: 1px solid green;">
+                    <div id="imageRounded" style="float: left; width: 30%; padding: 5px;">
+                        <p style="width: 100%; height: 100px;">bg image</p>
+                    </div>
+                    <div style="float: left; width: 65%; border: 1px solid blue; padding: 5px; text-align: right;">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id dapibus ante. Maecenas pretium augue arcu, ut pharetra augue dapibus vitae. Donec rutrum malesuada est sit amet laoreet. Nullam sem sapien, vulputate a tincidunt gravida, ultricies tincidunt tortor.</p>
+                        <p>Fusce malesuada velit sit amet sapien porttitor, nec porttitor ex ornare. Praesent orci nibh, pellentesque nec gravida vitae, dictum vel nisl. Ut id lectus ut metus convallis dignissim. Etiam et consequat ex. Aliquam et scelerisque nulla, non gravida ligula. Duis blandit vestibulum mauris, sed sagittis tortor vestibulum ac. Duis eget interdum erat. Etiam vulputate viverra elit non efficitur. Sed sit amet iaculis sem, eget fringilla justo. Fusce vitae semper orci.</p>
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
                 <div id="none" style="display: none;">I was not displayed!</div>
                 <div id="hidden" style="visibility: hidden;">I was hidden!</div>
                 <div id="videoContainer">        
@@ -80,7 +90,7 @@
     <script type="text/javascript" src="../base/changeFunctions.js"></script>
     <script type="text/javascript">
         
-        let constantUpdateLoop = false; // updates as much as possible, always. If false, only updates like this during animations
+        let constantUpdateLoop = true; // updates as much as possible, always. If false, only updates like this during animations
         let idToRender = "paragraphOne"; // "container"
 
         if( idToRender == "paragraphOne" && constantUpdateLoop )

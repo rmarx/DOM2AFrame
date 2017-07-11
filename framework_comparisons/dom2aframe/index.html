@@ -53,6 +53,16 @@
             <div id="bottom">
                 <a href="http://google.com" target="_blank">google.com</a>
             </div>
+            <div id="center2" style="width: 100%; border: 1px solid green;">
+                <div id="imageRounded" style="float: left; width: 30%; padding: 5px;">
+                    <p style="width: 100%; height: 100px;">bg image</p>
+                </div>
+                <div style="float: left; width: 65%; border: 1px solid blue; padding: 5px; text-align: right;">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id dapibus ante. Maecenas pretium augue arcu, ut pharetra augue dapibus vitae. Donec rutrum malesuada est sit amet laoreet. Nullam sem sapien, vulputate a tincidunt gravida, ultricies tincidunt tortor.</p>
+                    <p>Fusce malesuada velit sit amet sapien porttitor, nec porttitor ex ornare. Praesent orci nibh, pellentesque nec gravida vitae, dictum vel nisl. Ut id lectus ut metus convallis dignissim. Etiam et consequat ex. Aliquam et scelerisque nulla, non gravida ligula. Duis blandit vestibulum mauris, sed sagittis tortor vestibulum ac. Duis eget interdum erat. Etiam vulputate viverra elit non efficitur. Sed sit amet iaculis sem, eget fringilla justo. Fusce vitae semper orci.</p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
             <div id="none" style="display: none;">I was not displayed!</div>
             <div id="hidden" style="visibility: hidden;">I was hidden!</div>
             <div id="videoContainer">        
@@ -87,11 +97,11 @@
         <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 600px; min-height: 600px; padding: 3px;">
             <!--<canvas width="600" height="800"></canvas>-->
             <a-scene embedded stats="true" style="width: 600px; height: 600px">
-                <a-box color="red" position="0 12 -19" rotation="0 45 45" scale="1 1 1"></a-box>
-                <a-text value="ROBIN TEST" color="red" position="-5 12 -18" width="50"></a-text>
-                <a-box color="red" position="5 12 -19" rotation="0 45 45" scale="2 2 2"></a-box>
+                <a-box color="red" position="0 -12 -19" rotation="0 45 45" scale="1 1 1"></a-box>
+                <a-text value="ROBIN TEST" color="red" position="-5 -12 -18" width="50"></a-text>
+                <a-box color="red" position="5 -12 -19" rotation="0 45 45" scale="2 2 2"></a-box>
                 
-                <a-plane id="fullBox" color="green" position="0 0 -21" scale="20 20" visible="false"></a-plane>
+                <a-plane id="fullBox" color="green" position="0 0 -21" scale="30 40" visible="false"></a-plane>
                 <!--<a-box id="fullBox" color="green" position="0 0 -21" scale="15 15 5" visible="false"></a-plane>
                 
                 <a-entity>
