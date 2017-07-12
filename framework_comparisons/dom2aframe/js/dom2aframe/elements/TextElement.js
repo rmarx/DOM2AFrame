@@ -64,7 +64,10 @@ class TextElement extends Element{
 
 		this._UpdateTextAlignment(element_style);
 
-        this.atext.setAttribute("text", "value: " + stripText(this.domelement.innerHTML) + ";");
+        //this.atext.setAttribute("text", "value: " + stripText(this.domelement.innerHTML) + ";");
+        this.atext.setAttribute("text", "value", stripText(this.domelement.innerHTML) ); // other inline syntax ("value: " + stripText(this.domelement.innerHTML) + ";") sometimes give strange errors, but only for long text... you go figure
+		//this.atext.getAttribute("text").setAttribute("value", stripText(this.domelement.innerHTML));
+		//this.atext.components["text"].value = stripText(this.domelement.innerHTML);
 
         let domColor = element_style.getPropertyValue("color");
 
