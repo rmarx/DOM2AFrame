@@ -3,15 +3,19 @@ class ImageElement extends Element{
 		super(DOM2AFrame, domelement, depth, registerEvents);
 
 		//Image asset creation
+		/*
 		this.asset = this.domelement.cloneNode(true);
         var asset_id = "img-asset-" + this.DOM2AFrame.state.getNextAssetID();
         this.asset.setAttribute("id",asset_id);
 
         this.DOM2AFrame.AFrame.assets.appendChild( this.asset );
+		*/
+		let asset_id = this.GetAsset( this.domelement.getAttribute("src"), "img");
 
 		this.aelement = document.createElement("a-image");
         this.aelement.setAttribute("id", "IMAGE_" + asset_id);
 		this.aelement.setAttribute("src","#"+asset_id);
+		
 
         //console.warn("Created Image asset with source", asset_id, this.aelement, this.DOM2AFrame.AFrame.assets);
 
@@ -34,5 +38,7 @@ class ImageElement extends Element{
 		this.aelement.setAttribute("height", height);
 
 		this.aelement.setAttribute('position', this.position.xyz);
+		
+		this.UpdateBorders(element_style);
 	}
 }

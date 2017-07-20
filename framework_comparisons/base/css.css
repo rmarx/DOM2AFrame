@@ -39,7 +39,17 @@ body {
 	background-color: #FF0000;
 }
 
-#imageRounded p
+
+#container{
+    font-family: "Roboto", sans-serif;
+}
+
+#container p {
+    font-weight: normal;
+    color: #000000;
+}
+
+#imageRounded
 {
     border-radius: 25px;
     border: 2px solid red;
@@ -69,10 +79,16 @@ body {
 table, th, td{
     border-collapse: collapse;
     border: 1px solid black;
+    color: #FFFFFF;
 }
+
 
 td{
     padding: 5px;
+}
+
+th, td{ 
+    background-color: green;
 }
 
 

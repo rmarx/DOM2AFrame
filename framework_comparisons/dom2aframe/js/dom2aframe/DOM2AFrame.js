@@ -96,7 +96,9 @@ class DOM2AFrame{
             return;
         }
 
-        new_a_element.AElement.setAttribute("id", "a_" + DOMElement.getAttribute("id"));
+        let domID = DOMElement.getAttribute("id");
+        if( domID && domID != null )
+            new_a_element.AElement.setAttribute("id", "a_" + domID );
         
         this.elements.add(new_a_element);
 
@@ -131,7 +133,7 @@ class DOM2AFrame{
         }
     }
 
-    Init(){
+    Init(debug = false){
 
         THREE.ImageUtils.crossOrigin = '';
 
@@ -143,7 +145,9 @@ class DOM2AFrame{
         if (a_scenes && a_scenes.length > 0)
             this.AFrame.scene = a_scenes[0];
         else
-            this.AFrame.scene = document.createElement("a-scene");
+        {
+            this.AFrame.scene = document.createElement("a-scene"); 
+        }
 
         this.AFrame.scene.setAttribute("embedded", "true");
 
@@ -240,8 +244,9 @@ class DOM2AFrame{
             vrcss.innerHTML = ".a-enter-vr{position: fixed;} a-scene{height:0;} .a-canvas{ display: none; }";
         }
 
+        if( debug )
+            this.AFrame.scene.setAttribute("stats", true);
 
-        //this.AFrame.scene.setAttribute("stats", true);
         this.AFrame.scene.addEventListener("enter-vr", enterVr);
         this.AFrame.scene.addEventListener("exit-vr", exitVr);
         this.AFrame.scene.appendChild(camera_entity);
@@ -263,15 +268,28 @@ class DOM2AFrame{
 	    DOMContainerHeight = parseFloat(DOMContainerHeight).toFixed();
         DOMContainerHeight *= (1 / this.settings.DOMPixelsPerUnit);
 
+        //DOMContainerHeight *= 0.85; // for some reason, this aligns better with our camera for now // TODO: FIXME: do better initial positioning! 
+
+        console.log("Setting AFrame container position", "" + (-DOMContainerWidth/2) + " " + (DOMContainerHeight/2) + " " + this.settings.startingZindex)
         this.AFrame.container.setAttribute("position", "" + (-DOMContainerWidth/2) + " " + (DOMContainerHeight/2) + " " + this.settings.startingZindex);
 
 
         // TODO: FIXME: allow user to pass a parent element for a created a-scene
         let canvasContainer = document.getElementById("canvasContainer");
-        if (this.AFrame.scene.parentElement != canvasContainer) {
+        if( !canvasContainer )
+        {            
+            document.body.appendChild(this.AFrame.scene);
+        }
+        else if (this.AFrame.scene.parentElement != canvasContainer) {
             canvasContainer.appendChild(this.AFrame.scene);
         }
-
+        /*
+        else
+        {
+            console.warn("Aframe scene parent element is", this.AFrame.scene.parentElement, canvasContainer, (this.AFrame.scene.parentElement == canvasContainer) );
+            document.body.appendChild(this.AFrame.scene);
+        }
+        */
         this._TransformFullDOM();
 
     } // Init()
@@ -408,12 +426,18 @@ function checkKey(e) {
         */
 
         //document.getElementById("paragraphOne").innerHTML = "INNERHTML change leads to mutationRecord?";
-
+        /*
         let clickHandler = () => { alert("imageLeft clicked! From a-frame!"); document.getElementById("imageLeft").removeEventListener('click', clickHandler); };
         document.getElementById("imageLeft").addEventListener("click", clickHandler );
         
         let mousedownHandler = () => { console.log("imageLeft mousedown! From a-frame!"); document.getElementById("imageLeft").removeEventListener('mousedown', mousedownHandler); };
         document.getElementById("imageLeft").addEventListener("mousedown", mousedownHandler );
+        */
+
+        // this does NOT trigger mutation events! 
+        let borderCSS = document.createElement('style');
+        borderCSS.innerHTML = "*{ border: 1px solid blue;}"; // .a-enter-vr{position: fixed;} 
+        document.body.appendChild(borderCSS);
     }
 
 }

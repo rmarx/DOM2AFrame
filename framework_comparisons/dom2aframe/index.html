@@ -4,22 +4,11 @@
 <head>
     <meta charset="utf-8">
     <title>Dom2Aframe</title>
-    <link rel="stylesheet" href="../base/css.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="../base/css.css">
+    
 
     <style>
-        #container{
-            font-family: "Roboto", sans-serif;
-        }
-
-        #container p {
-            font-weight: normal;
-            color: #000000;
-        }
-
-        th, td{
-            background-color: green;
-        }
 
     </style>
 
@@ -42,7 +31,7 @@
         <div id="container" style="width: 500px; border: 3px solid black; padding: 5px; float: left;">
             <div id="top">
                 <input id="textInput" type="text" value="initvalue" style="width: 100%;" /><br/>
-                <input id="checkboxInput" type="checkbox" value="initvalue">Checkbox input<br/>
+                <input id="checkboxInput" type="checkbox" value="initvalue"><span>Checkbox input</span><br/>
             </div>
             <div id="center" style="width: 50%; border: 1px solid green;">
                 <div id="imageLeft" style="float: left; width: 30%; padding: 5px;">
@@ -57,11 +46,18 @@
             <div id="bottom">
                 <a href="http://google.com" target="_blank">google.com</a>
             </div>
+            <!--<div id="overflowContainer1" style="overflow: hidden; width: 200px; height: 50px; border: 2px solid black;">
+                <p id="overflowp1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam elit erat, gravida eget posuere ut, aliquet ut tellus. Donec et luctus augue. </p>
+                <p>Suspendisse vel dui ipsum. Fusce interdum erat et mi tempus, ac elementum eros imperdiet. Donec dui nunc, pretium ut ultrices ac, placerat vitae mauris. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse lobortis, nulla ut finibus dapibus, mi purus iaculis lacus, et sagittis neque justo eu tortor. Etiam at eros eu ante fringilla viverra. Morbi hendrerit ipsum efficitur congue feugiat. Sed vitae turpis nisi. Nulla facilisi. Vestibulum euismod, risus a rhoncus condimentum, quam tellus convallis nisl, at gravida elit elit ac felis.</p>
+            </div>-->
+            <div id="overflowContainer2" style="overflow: hidden; width: 200px; height: 50px; border: 2px solid black;">
+                <p style="width: 500px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam elit erat, gravida eget posuere ut, aliquet ut tellus. Donec et luctus augue. </p>
+            </div>
             <div id="center2" style="width: 100%; border: 1px solid green;">
-                <div id="imageRounded" style="float: left; width: 30%; padding: 5px;">
+                <div id="imageRounded" style="float: left; width: 25%; padding: 5px;">
                     <p style="width: 100%; height: 100px;">bg image</p>
                 </div>
-                <div style="float: left; width: 65%; border: 1px solid blue; padding: 5px; text-align: center;">
+                <div style="float: left; width: 65%; border: 1px solid blue; padding: 5px; text-align: right;">
                     <p style="text-align: center;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id dapibus ante. Maecenas pretium augue arcu, ut pharetra augue dapibus vitae. Donec rutrum malesuada est sit amet laoreet. Nullam sem sapien, vulputate a tincidunt gravida, ultricies tincidunt tortor.</p>
                     <p>Fusce malesuada velit sit amet sapien porttitor, nec porttitor ex ornare. Praesent orci nibh, pellentesque nec gravida vitae, dictum vel nisl. Ut id lectus ut metus convallis dignissim. Etiam et consequat ex. Aliquam et scelerisque nulla, non gravida ligula. Duis blandit vestibulum mauris, sed sagittis tortor vestibulum ac. Duis eget interdum erat. Etiam vulputate viverra elit non efficitur. Sed sit amet iaculis sem, eget fringilla justo. Fusce vitae semper orci.</p>
                 </div>
@@ -98,12 +94,12 @@
             </div>
         </div>
 
-        <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 600px; min-height: 600px; padding: 3px;">
+        <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 600px; min-height: 1000px; padding: 3px;">
             <!--<canvas width="600" height="800"></canvas>-->
-            <a-scene embedded stats="true" style="width: 600px; height: 600px">
-                <a-box color="red" position="0 -12 -19" rotation="0 45 45" scale="1 1 1"></a-box>
-                <a-text value="ROBIN TEST" color="red" position="-5 -12 -18" width="50"></a-text>
-                <a-box color="red" position="5 -12 -19" rotation="0 45 45" scale="2 2 2"></a-box>
+            <a-scene embedded stats="true" style="width: 600px; height: 1000px">
+                <a-box color="red" position="0 -15 -19" rotation="0 45 45" scale="1 1 1"></a-box>
+                <a-text value="DOM 2 AFRAME" color="red" position="-5 -15 -18" width="50"></a-text>
+                <a-box color="red" position="5 -15 -19" rotation="0 45 45" scale="2 2 2"></a-box>
                 
                 <a-plane id="fullBox" color="green" position="0 0 -21" scale="30 40" visible="false"></a-plane>
                 <!--<a-box id="fullBox" color="green" position="0 0 -21" scale="15 15 5" visible="false"></a-plane>
@@ -209,8 +205,10 @@
         //dom2aframe_init(document.body);//idToRender); // TODO: re-enable this to prevent it from taking full document as target! 
        // dom2aframe_init( document.getElementById("container") ); // TODO: re-enable this to prevent it from taking full document as target! 
 
-       const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container") );
-       DOM2AFrame1.Init();
+       let settings = new DOM2AFrameSettings();
+       settings.startingZindex = -30;
+       const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container"), settings );
+       DOM2AFrame1.Init(true);
 
     </script> 
 

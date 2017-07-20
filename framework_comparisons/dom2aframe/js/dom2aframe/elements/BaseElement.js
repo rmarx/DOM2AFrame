@@ -89,6 +89,7 @@ class Element{
         this.DOM2AFrame = DOM2AFrame;
 
 		this.domelement = domelement;
+        this.domelement.d2aelement = this; // so we can do a reverse lookup if need be (not used by our core setup, but handy for debugging)
 		this.aelement = null; // is supposed to be filled in by object creator or, more usually, a subclass constructor
 
         this.children = new Set();
@@ -127,6 +128,16 @@ class Element{
         //Listenes for transition changes, only works on Microsoft Edge
         this.domelement.addEventListener("transitionstart", this.StartAnimation.bind(this));
         this.domelement.addEventListener("transitionend",   this.StopAnimation.bind(this));
+        
+        // for form elements 
+        let self = this;
+        this.domelement.addEventListener("input", (evt) => { 
+            if( evt.target == this.domelement )
+                evt.stopPropagation();
+
+            console.warn("input changed!"); 
+            self.HandleMutation(); 
+        });
 
         this.mouseEventHandler._resync(); // perform the initial sync to pick-up mouse handlers that might have been registered before this element // TODO: maybe move this to MouseEventHandler ctor instead?
     }
@@ -236,5 +247,71 @@ class Element{
 
 
         this.dirty = false;
+    }
+
+    // in BaseElement because shared by various elements, but not auto-called by Update() because not each element requires it
+    UpdateBorders(element_style){
+		if( !this.borderObject ){		
+			let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
+
+			// this works, but linewidth isn't adjustable 
+			// TODO: change to https://stackoverflow.com/questions/11638883/thickness-of-lines-using-three-linebasicmaterial or https://stemkoski.github.io/Three.js/Outline.html 
+			var box = new THREE.BoxHelper( /*this.aelement.object3D*/ threePlane, 0x00ff00 );
+			box.material.lineWidth = 500; // for some reason, this doesn't work on windows platforms: https://threejs.org/docs/#api/materials/LineBasicMaterial
+			box.material.color = {r: 0, g: 0, b: 0};
+			box.material.needsUpdate = true;
+			this.aelement.setObject3D('border', box);
+			this.borderObject = box;
+		}
+		
+		let borderWidth = parseFloat(element_style.borderWidth);
+        if( this.customBorder )
+            borderWidth = this.customBorder.width;
+		
+		if( borderWidth == 0 ){
+			this.borderObject.material.visible = false;
+		}
+		else{
+			this.borderObject.material.visible = true;
+
+			this.borderObject.material.lineWidth = borderWidth;
+
+			// TODO: cache this value?
+			// TODO: use decent Color class (e.g. the one from html2canvas, which this is based on)
+            
+            if( this.customBorder )
+                this.borderObject.material.color = this.customBorder.color;
+            else{
+                let colorRGB = element_style.borderColor;
+
+                let _rgb = /^rgb\((\d{1,3}) *, *(\d{1,3}) *, *(\d{1,3})\)$/;
+                let match = colorRGB.match(_rgb);
+                if( match !== null ){
+                    this.borderObject.material.color = {r: Number(match[1]) / 256, g: Number(match[2]) / 256, b: Number(match[3]) / 256};
+                }
+            }
+
+		}
+		
+		this.borderObject.material.needsUpdate = true;
+	}
+
+    // ex. GetAsset("http://google.com/logo.png", "img")
+    GetAsset(path, type){
+        var assets = this.DOM2AFrame.AFrame.assets.getChildren();
+
+        for (var i = 0; i < assets.length; i++)
+            if (assets[i].getAttribute("src") === path)
+                return assets[i].getAttribute("id");
+
+        //Asset creation
+        var asset = document.createElement(type);
+        asset.setAttribute("src", path);
+        var id = "asset-" + this.DOM2AFrame.state.getNextAssetID();
+        asset.setAttribute("id", id);
+
+        this.DOM2AFrame.AFrame.assets.appendChild(asset);
+
+        return id;
     }
 }

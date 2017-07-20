@@ -37,6 +37,7 @@ class TextElement extends Element{
 
         this.atext.setAttribute("align", "left"); 
 		this.atext.setAttribute("anchor", "left"); // for some reason, anchor moves the pivot of the text element as well, but our coordinates are always relative to the CENTER 
+		//this.atext.setAttribute("baseline", "top");
 
         //this.aelement.setAttribute("width", "auto");
         //this.aelement.setAttribute("height", "auto");
@@ -53,6 +54,8 @@ class TextElement extends Element{
 			// we just want to trigger a click event, so need to register a dummy click handler
 			this.domelement.addEventListener("click", (evt) => { console.log("Link clicked!", this.domelement.getAttribute("href"), this.domelement); })
 		}
+
+		this.domelement.d2aelement = this; // ContainerElement also claimed itself as being the d2aelement, which is obviously wrong! 
     }
 
 	ElementSpecificUpdate(element_style){
@@ -64,8 +67,15 @@ class TextElement extends Element{
 
 		this._UpdateTextAlignment(element_style);
 
+		let textValue = undefined;
+		// TODO: make this more generic using a plugin system/CalculateTextValue override (set in DOM2AFrame::AddDOMElement) to also support other elements in a more generic way
+		if( this.domelement.tagName == "INPUT" && this.domelement.getAttribute("type") == "text" && this.domelement.getAttribute("value") )
+			textValue = this.domelement.value;
+		else
+			textValue = stripText(this.domelement.innerHTML);
+
         //this.atext.setAttribute("text", "value: " + stripText(this.domelement.innerHTML) + ";");
-        this.atext.setAttribute("text", "value", stripText(this.domelement.innerHTML) ); // other inline syntax ("value: " + stripText(this.domelement.innerHTML) + ";") sometimes give strange errors, but only for long text... you go figure
+        this.atext.setAttribute("text", "value", textValue ); // other inline syntax ("value: " + stripText(this.domelement.innerHTML) + ";") sometimes give strange errors, but only for long text... you go figure
 		//this.atext.getAttribute("text").setAttribute("value", stripText(this.domelement.innerHTML));
 		//this.atext.components["text"].value = stripText(this.domelement.innerHTML);
 
@@ -138,6 +148,9 @@ class TextElement extends Element{
 		else if( anchor == "right" )
 			xyz.x += this.position.width / 2; // shift to the right
 		// if center, nothing to be done! 
+
+		// TODO: make this more neat, now only works for baseline == "top"
+		//xyz.y += (this.position.height / 2) * 0.85;
 
         this.atext.setAttribute("position", xyz );
 	}
