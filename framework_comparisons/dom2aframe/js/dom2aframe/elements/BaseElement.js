@@ -211,6 +211,14 @@ class Element{
         this.DOM2AFrame.UpdateAll(); // TODO : FIXME: for now, we're bubbling up (so basically redrawing everything) but eventually we want to only update the changed parts and their children!
     }
 
+    // called once after the element is fully mounted and the THREE.js renderer is coupled etc.
+    Init(){
+        this._SetupClipping();
+        
+        for( let child of this.children )
+            child.Init();
+    }
+
     Update(forceUpdate = false, updateChildren = true){
 
         if(updateChildren){
@@ -244,7 +252,7 @@ class Element{
         
         this.ElementSpecificUpdate(element_style);
 
-
+        this.UpdateClipping();
 
         this.dirty = false;
     }
@@ -313,5 +321,118 @@ class Element{
         this.DOM2AFrame.AFrame.assets.appendChild(asset);
 
         return id;
+    }
+
+
+    _GetClippingContext(){
+        let output = undefined;
+        
+        if( this.domelement.getAttribute("id") == "overflowp2" )
+            console.log("Clipping overflowp2", this.domelement.parentNode, this.domelement.parentNode.d2aelement);
+
+        // TODO: make sure that we always have a d2a path up to the clipping parent! i.e. if we skip certain dom elements but process their children, we still want to be able to get the clipping context! 
+        if( this.domelement.parentNode && this.domelement.parentNode.d2aelement && this.domelement.parentNode.d2aelement.clippingContext ){
+            // our parent node has clipping set : we just inherit
+            output = this.domelement.parentNode.d2aelement.clippingContext;
+        }
+        else{
+            var element_style = window.getComputedStyle(this.domelement);
+            if( element_style.overflow && element_style.overflow == "hidden"){ // TODO: support other overflow types as well (scroll is going to be very difficult with this setup though...) 
+
+                let clippingContext = {};
+                clippingContext.authority = this;
+
+                clippingContext.bottom = new THREE.Plane(new THREE.Vector3(0,1,0),  0); // normal pointing UP
+                clippingContext.top    = new THREE.Plane(new THREE.Vector3(0,-1,0), 0); // normal pointing DOWN
+                clippingContext.left   = new THREE.Plane(new THREE.Vector3(1,0,0),  0); // normal pointing RIGHT
+                clippingContext.right  = new THREE.Plane(new THREE.Vector3(-1,0,0), 0); // normal pointing LEFT
+
+                clippingContext.planes = [clippingContext.bottom, clippingContext.top, clippingContext.left, clippingContext.right];
+
+                output = clippingContext;
+            }
+        }
+
+        return output;
+    }
+
+    // needed for overflow
+    _SetupClipping(){
+        
+        if( !this.DOM2AFrame.settings.clippingEnabled )
+            return;
+
+        // currently, we only support a single overflow context in a subtree
+        // i.e. a container with overflow:hiddden set, cannot have children that also have overflow: hidden set 
+        // to support that, we would have a seperate clippingContext per child, but also have children have the clippingPlanes of all their active clipping parents set (merger of different clipping plane arrays)
+        // this is certianly possible, but too complex for our needs right now 
+
+        // TODO: we currently don't support overflow settings changing at runtime! 
+
+        let clippingContext = this._GetClippingContext();
+
+        if( clippingContext ){
+
+            this.clippingContext = clippingContext;
+
+            // we are sure the renderer is loaded (DOM2AFrame only calls Update() after the element has a THREE.js equivalent loaded)
+            let obj3d = this.aelement.object3D;
+            if( !obj3d || !obj3d.children || !obj3d.children.length > 0 || !obj3d.children[0].material ){
+                console.error("Trying to set clipping but no Three.js element known!", obj3d, this);
+                return;
+            }
+
+            let material = obj3d.children[0].material; // in a-frame, all object3D's are a Group, even if they just have 1 child.
+
+            // we need to set the clipping planes on all elements in the clipped subtree, since each element does its own clipping in their shader
+            // however, the clippingContext is a reference value, so if we update these clipping plane definitions once (in the parent's Update), it will cascade to all these children as well
+            material.clipping = true;
+            //material.clippingPlanes = clippingContext.planes;
+            material.clippingPlanes = [clippingContext.bottom];
+
+            console.error("Aded clipping to ", this.domelement, this.clippingContext.authority.domelement );
+
+            this.UpdateClipping(); // position the planes correctly for initialization
+            material.needsUpdate = true;
+        }
+    }
+
+    UpdateClipping(){
+        if( !this.clippingContext || 
+            !this.clippingContext.authority == this ) // only the element with actual overflow set can change positioning of the clipping planes
+            return;
+
+        // TODO: we currently don't support overflow settings changing at runtime! 
+        
+        // TODO: actually change coPlanarPoint's of the planes depending on our position! 
+
+
+        let bottomPoint = new THREE.Vector3( this.position.x, this.position.y /*- (this.position.height/2)*/, this.position.z ); 
+        bottomPoint = bottomPoint.add( this.DOM2AFrame.AFrame.container.object3D.position );
+        
+        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(new THREE.Vector3( 0, 1, 0 ), bottomPoint).normalize();
+
+        this.aelement.object3D.children[0].material.needsUpdate = true; // TODO: shouldn't be needed! remove!
+        
+        console.warn("Updating clipping : ", this.DOM2AFrame.AFrame.scene.renderer.localClippingEnabled, this.aelement.object3D.children[0].material.clippingPlanes, this.clippingContext.bottom, this.domelement);
+
+
+        //     var dir = new THREE.Vector3(0,1,0);
+        //     var centroid = new THREE.Vector3(containerPosition.x, containerPosition.y - (containerPosition.height / 2),containerPosition.z);
+        //     centroid = centroid.add(DOM2AFrame1.AFrame.container.object3D.position); // in-place operation
+
+        //    // alert( JSON.stringify(centroid.add(DOM2AFrame1.AFrame.container.object3D.position)) );
+        //     var plane = new THREE.Plane();
+        //     plane.setFromNormalAndCoplanarPoint(dir, centroid).normalize();
+
+        //     let bottomPlane = plane; //new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), containerBottomY );
+        //     material.clippingPlanes = [bottomPlane];
+
+        //     bottomClippingPlane = bottomPlane;
+
+        //     box.setAttribute("position", centroid.x + " " + centroid.y + " " + centroid.z);
+
+        //     material.needsUpdate = true;
+
     }
 }

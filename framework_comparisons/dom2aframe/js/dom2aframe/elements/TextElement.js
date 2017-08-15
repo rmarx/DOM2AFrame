@@ -198,4 +198,18 @@ class TextElement extends Element{
 			console.warn("Set wrappixels to ", widthInPixels, this.position.width);
 			*/
 	};
+
+    UpdateClipping(){
+
+		// NOTE: we currently assume text elements themselves never have overflow set: always wrap them in a container that does!
+		if( !this.clippingContext )
+			return;
+
+		if( !this.clippingShaderSetup ){
+			console.error("TODO: setup clipping shader for text element!");
+			this.clippingShaderSetup = true;
+		}
+
+		super.UpdateClipping();
+    }
 }

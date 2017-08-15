@@ -68,12 +68,12 @@ class DOM2AFrame{
 
         if (DOMElement.tagName == undefined) {
             console.trace("DOM2AFrame:AddDOMElement : tried to add a non-tagged element (innertext, comment, etc.) : not adding to aframe", DOMElement);
-            return;
+            return undefined;
         }
 
         if( this.settings.ignoreElementTags.has(DOMElement.tagName) )
         {
-            return;
+            return undefined;
         }
 
         let layer = this.state.currentLayerDepth;
@@ -106,6 +106,7 @@ class DOM2AFrame{
         // this means we need to wait until A-frame says it's good and loaded
         // otherwise, we might update some attributes, which are then replace by a-frame's default attributes immediately after 
         let onLoaded = (event) => {
+            new_a_element.Init();
             new_a_element.Update(true);
             new_a_element.AElement.removeEventListener("play", onLoaded);
         };
@@ -118,6 +119,8 @@ class DOM2AFrame{
 
 
         this.state.currentLayerDepth += this.settings.layerStepSize;
+
+        return new_a_element;
     }
 
     RemoveDOMElement(DOMElement){
@@ -290,6 +293,14 @@ class DOM2AFrame{
             document.body.appendChild(this.AFrame.scene);
         }
         */
+        
+         // TODO: make sure the THREE.js renderer is always available here already!
+        if( !this.AFrame.scene.renderer )
+            this.AFrame.scene.addEventListener("render-target-loaded", () => { 
+                this.AFrame.scene.renderer.localClippingEnabled = true; }, {once: true});
+        else
+            this.AFrame.scene.renderer.localClippingEnabled = true;
+
         this._TransformFullDOM();
 
     } // Init()
@@ -298,15 +309,44 @@ class DOM2AFrame{
 
         // TODO: clear this.AFrame.scene first?
 
-        let items = Array.from( this.DOM.container.getElementsByTagName("*") );
-        items.unshift( this.DOM.container ); // prepend container itself because we also want to render it and as the first item
+        if( this.settings.elementIterationStrategy == this.settings.elementIterationStrategies.TREE ){
 
-        // TODO: FIXME: currently we assume the items will always be in the corret z-index sorted order when the come out of getElementsByTagName()
-        // this might not always be the case!!! need to sort them somehow? computedStyle.z-index maybe? but that will be the same for everything? need to take into account parent-child relationships etc... difficult
 
-        //Transcode every element in the page
-        for (let item of items)
-            this.AddDOMElement( item );
+            let addDOMChildrenRecursively = (parent, currentNode) => {
+
+                if( !currentNode || currentNode == null ){
+                    console.error("_TransformFullDOM : currentNode not defined... ", currentNode, parent);
+                }
+
+                let aElement = this.AddDOMElement( currentNode );
+
+                if( !aElement ) // i.e. unknown tag that we don't handle yet
+                    return;
+
+                if( currentNode.children && currentNode.children.length > 0 ){
+                    for( let child of currentNode.children ){
+                        addDOMChildrenRecursively( currentNode, child );
+                    }
+                }
+            };
+
+            addDOMChildrenRecursively( undefined, this.DOM.container );
+        }
+        else if(this.settings.elementIterationStrategy == this.settings.elementIterationStrategies.FLAT ){
+            let items = Array.from( this.DOM.container.getElementsByTagName("*") );
+            items.unshift( this.DOM.container ); // prepend container itself because we also want to render it and as the first item
+
+            // TODO: FIXME: currently we assume the items will always be in the corret z-index sorted order when the come out of getElementsByTagName()
+            // this might not always be the case!!! need to sort them somehow? computedStyle.z-index maybe? but that will be the same for everything? need to take into account parent-child relationships etc... difficult
+
+            //Transcode every element in the page
+            for (let item of items)
+                this.AddDOMElement( item );
+        }
+        else
+            console.error("DOM2AFrame:_TransformFullDOM : elementIterationStrategy not supported!", this.settings, this);
+
+       
 
         var self = this;
         //Observer to check for newly added or deleted DOM elements
