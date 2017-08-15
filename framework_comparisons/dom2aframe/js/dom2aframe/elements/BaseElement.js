@@ -259,13 +259,31 @@ class Element{
 
     // in BaseElement because shared by various elements, but not auto-called by Update() because not each element requires it
     UpdateBorders(element_style){
-		if( !this.borderObject ){		
+        
+        // TODO: needed because THREE.BoxHelper doesn't automatically follow changes to the underlying mesh. Find some way to update the boxhelper without re-creating it every time
+        // NOTE: this commented-out code didn't work... borders just disappear... *headdesk*
+        /*
+        if( !this.elWidthForBorders )
+            this.elWidthForBorders = this.position.width;
+        if( !this.elHeightForBorders )
+            this.elHeightForBorders = this.position.height;
+
+        if( this.elWidthForBorders != this.position.width || this.elHeightForBorders != this.position.height )
+            this.borderObject = undefined;
+
+        this.elWidthForBorders = this.position.width;
+        this.elHeightForBorders = this.position.height;
+
+        */
+
+        
+		if( !this.borderObject ){
 			let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
 
 			// this works, but linewidth isn't adjustable 
 			// TODO: change to https://stackoverflow.com/questions/11638883/thickness-of-lines-using-three-linebasicmaterial or https://stemkoski.github.io/Three.js/Outline.html 
 			var box = new THREE.BoxHelper( /*this.aelement.object3D*/ threePlane, 0x00ff00 );
-			box.material.lineWidth = 500; // for some reason, this doesn't work on windows platforms: https://threejs.org/docs/#api/materials/LineBasicMaterial
+			box.material.lineWidth = 1; // for some reason, this doesn't work on windows platforms: https://threejs.org/docs/#api/materials/LineBasicMaterial
 			box.material.color = {r: 0, g: 0, b: 0};
 			box.material.needsUpdate = true;
 			this.aelement.setObject3D('border', box);
@@ -288,7 +306,7 @@ class Element{
 			// TODO: use decent Color class (e.g. the one from html2canvas, which this is based on)
             
             if( this.customBorder )
-                this.borderObject.material.color = this.customBorder.color;
+                this.borderObject.material.color = this.customBorder.color; 
             else{
                 let colorRGB = element_style.borderColor;
 
@@ -326,9 +344,6 @@ class Element{
 
     _GetClippingContext(){
         let output = undefined;
-        
-        if( this.domelement.getAttribute("id") == "overflowp2" )
-            console.log("Clipping overflowp2", this.domelement.parentNode, this.domelement.parentNode.d2aelement);
 
         // TODO: make sure that we always have a d2a path up to the clipping parent! i.e. if we skip certain dom elements but process their children, we still want to be able to get the clipping context! 
         if( this.domelement.parentNode && this.domelement.parentNode.d2aelement && this.domelement.parentNode.d2aelement.clippingContext ){
@@ -338,6 +353,8 @@ class Element{
         else{
             var element_style = window.getComputedStyle(this.domelement);
             if( element_style.overflow && element_style.overflow == "hidden"){ // TODO: support other overflow types as well (scroll is going to be very difficult with this setup though...) 
+
+                console.error("Found new clipping authority! ", this); 
 
                 let clippingContext = {};
                 clippingContext.authority = this;
@@ -378,7 +395,7 @@ class Element{
             // we are sure the renderer is loaded (DOM2AFrame only calls Update() after the element has a THREE.js equivalent loaded)
             let obj3d = this.aelement.object3D;
             if( !obj3d || !obj3d.children || !obj3d.children.length > 0 || !obj3d.children[0].material ){
-                console.error("Trying to set clipping but no Three.js element known!", obj3d, this);
+                console.error("TextElement._SetupClipping: Trying to set clipping but no Three.js element known!", obj3d, this);
                 return;
             }
 
@@ -387,10 +404,11 @@ class Element{
             // we need to set the clipping planes on all elements in the clipped subtree, since each element does its own clipping in their shader
             // however, the clippingContext is a reference value, so if we update these clipping plane definitions once (in the parent's Update), it will cascade to all these children as well
             material.clipping = true;
-            //material.clippingPlanes = clippingContext.planes;
-            material.clippingPlanes = [clippingContext.bottom];
+            material.clippingPlanes = clippingContext.planes;
+            //material.clippingPlanes = [clippingContext.right, clippingContext.left, clippingContext.top];//[clippingContext.bottom];
+            //material.clippingPlanes = [clippingContext.bottom, clippingContext.top];//, clippingContext.top, clippingContext.right];
 
-            console.error("Aded clipping to ", this.domelement, this.clippingContext.authority.domelement );
+            console.error("Added clipping to ", this.constructor.name, this.domelement, this.clippingContext.authority.domelement );
 
             this.UpdateClipping(); // position the planes correctly for initialization
             material.needsUpdate = true;
@@ -398,8 +416,10 @@ class Element{
     }
 
     UpdateClipping(){
-        if( !this.clippingContext || 
-            !this.clippingContext.authority == this ) // only the element with actual overflow set can change positioning of the clipping planes
+
+         // only the element with actual overflow set (the "authority") can change positioning of the clipping planes
+         // NOTE: this means we currently only support a single authority in a given chain! see _SetupClipping()
+        if( !this.clippingContext || this.clippingContext.authority != this )
             return;
 
         // TODO: we currently don't support overflow settings changing at runtime! 
@@ -407,10 +427,23 @@ class Element{
         // TODO: actually change coPlanarPoint's of the planes depending on our position! 
 
 
-        let bottomPoint = new THREE.Vector3( this.position.x, this.position.y /*- (this.position.height/2)*/, this.position.z ); 
-        bottomPoint = bottomPoint.add( this.DOM2AFrame.AFrame.container.object3D.position );
+        let bottomPoint = new THREE.Vector3( this.position.x, this.position.y - (this.position.height/2), this.position.z ); 
+        let topPoint    = new THREE.Vector3( this.position.x, this.position.y + (this.position.height/2), this.position.z ); 
+        let leftPoint   = new THREE.Vector3( this.position.x - (this.position.width/2), this.position.y, this.position.z ); 
+        let rightPoint  = new THREE.Vector3( this.position.x + (this.position.width/2), this.position.y, this.position.z ); 
+
+        // plane positions are in world position, and ours are relative to the AFrame top-level container, so we need to manually offset
+        // TODO: make this more robust? allow any number of parents or get our world positions from the THREE.js object with proper world matrix? 
+        bottomPoint = bottomPoint.add(  this.DOM2AFrame.AFrame.container.object3D.position );
+        topPoint    = topPoint.add(     this.DOM2AFrame.AFrame.container.object3D.position );
+        leftPoint   = leftPoint.add(    this.DOM2AFrame.AFrame.container.object3D.position );
+        rightPoint  = rightPoint.add(   this.DOM2AFrame.AFrame.container.object3D.position );
         
-        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(new THREE.Vector3( 0, 1, 0 ), bottomPoint).normalize();
+        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(  new THREE.Vector3( 0, 1, 0 ), bottomPoint   ).normalize();
+        this.clippingContext.top.setFromNormalAndCoplanarPoint(     new THREE.Vector3( 0, -1, 0 ), topPoint     ).normalize();
+        this.clippingContext.left.setFromNormalAndCoplanarPoint(    new THREE.Vector3( 1, 0, 0 ), leftPoint     ).normalize();
+        this.clippingContext.right.setFromNormalAndCoplanarPoint(   new THREE.Vector3( -1, 0, 0 ), rightPoint   ).normalize();
+
 
         this.aelement.object3D.children[0].material.needsUpdate = true; // TODO: shouldn't be needed! remove!
         

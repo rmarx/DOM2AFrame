@@ -24,6 +24,18 @@
             return 0.5;
         }
 
+        changeFunctions.animateWidthEl = function(el)
+        {
+            el.style.animation = 'animWidth 2s 1';
+
+            el.addEventListener('animationend', function(){
+                this.style.webkitAnimationName = '';
+                this.style.animationName = '';
+            }, false);
+
+            return 2;
+        }
+
         changeFunctions.changeColor = function()
         {
             var textRightPone = document.getElementById("textRight").getElementsByTagName("p")[0];

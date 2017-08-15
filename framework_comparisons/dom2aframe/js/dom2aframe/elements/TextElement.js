@@ -199,6 +199,120 @@ class TextElement extends Element{
 			*/
 	};
 
+	_SetupClipping(){
+        
+        if( !this.DOM2AFrame.settings.clippingEnabled )
+			return;
+
+        let clippingContext = this._GetClippingContext();
+
+        if( clippingContext ){
+
+            this.clippingContext = clippingContext;
+
+            // we are sure the renderer is loaded (DOM2AFrame only calls Update() after the element has a THREE.js equivalent loaded)
+            let obj3d = this.atext.object3D;
+            if( !obj3d || !obj3d.children || !obj3d.children.length > 0 || !obj3d.children[0].material ){
+                console.error("TextElement._SetupClipping: Trying to set clipping but no Three.js element known!", obj3d, this);
+                return;
+            }
+
+            let material = obj3d.children[0].material; // in a-frame, all object3D's are a Group, even if they just have 1 child.
+
+			// the Text shader is a custom shader. This means THREE.js doesn't automatically inject the clippingPlanes into the text shader and we need to do it ourselves
+			// so we copied the text shader code from the Text plugin and added the necessary stuff ourselves
+			// https://stackoverflow.com/questions/42532545/add-clipping-to-three-shadermaterial
+            // https://jsfiddle.net/27LrLsv5/1/
+            let customFragment = `
+            #ifdef GL_OES_standard_derivatives
+			#extension GL_OES_standard_derivatives: enable
+			#endif
+
+            precision highp int;
+			precision highp float;
+
+            // these are set by WebGLProgram when material.isRawShaderMaterial is false (but we ARE raw shader, so we need to set these ourselves)
+            // https://github.com/mrdoob/three.js/blob/30c966b579234717a3b237229ddedb62e2e6d986/src/renderers/webgl/WebGLProgram.js
+            #define NUM_CLIPPING_PLANES 4
+            #define UNION_CLIPPING_PLANES 4
+
+            // https://github.com/mrdoob/three.js/blob/e220a4baac6b415124cbfbf370f3c7aa44fbb13e/src/renderers/shaders/ShaderChunk/clipping_planes_pars_fragment.glsl
+			  #include <clipping_planes_pars_fragment>
+
+			#define BIG_ENOUGH 0.001
+			#define MODIFIED_ALPHATEST (0.02 * isBigEnough / BIG_ENOUGH)
+			#define ALL_SMOOTH 0.4
+			#define ALL_ROUGH 0.02
+			#define DISCARD_ALPHA (alphaTest / (2.2 - 1.2 * ratio))
+			uniform sampler2D map;
+			uniform vec3 color;
+			uniform float opacity;
+			uniform float alphaTest;
+			varying vec2 vUV;
+			float median(float r, float g, float b) {
+			  return max(min(r, g), min(max(r, g), b));
+			}
+			
+			
+			void main() {
+              // https://github.com/mrdoob/three.js/blob/e220a4baac6b415124cbfbf370f3c7aa44fbb13e/src/renderers/shaders/ShaderChunk/clipping_planes_fragment.glsl
+			  #include <clipping_planes_fragment>
+
+			  vec3 sample = 1.0 - texture2D(map, vUV).rgb;
+			  float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
+			  float alpha = clamp(sigDist/fwidth(sigDist) + 0.5, 0.0, 1.0);
+			  float dscale = 0.353505;
+			  vec2 duv = dscale * (dFdx(vUV) + dFdy(vUV));
+			  float isBigEnough = max(abs(duv.x), abs(duv.y));
+			  if (isBigEnough > BIG_ENOUGH) {
+				float ratio = BIG_ENOUGH / isBigEnough;
+				alpha = ratio * alpha + (1.0 - ratio) * (sigDist + 0.5);
+			  }
+			  if (isBigEnough <= BIG_ENOUGH && alpha < alphaTest) { discard; return; }
+			  if (alpha < alphaTest * MODIFIED_ALPHATEST) { discard; return; }
+			  gl_FragColor = vec4(color.xyz, alpha * opacity);
+			}`;
+            // 
+            // 
+
+            let customVertex = `
+            
+            #define NUM_CLIPPING_PLANES 4
+            #define UNION_CLIPPING_PLANES 4
+
+            #include <clipping_planes_pars_vertex>
+
+            attribute vec2 uv;
+			attribute vec3 position;
+			uniform mat4 projectionMatrix;
+			uniform mat4 modelViewMatrix;
+			varying vec2 vUV;
+			void main(void) {
+        	    #include <begin_vertex>
+
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                vUV = uv;
+                
+                #include <project_vertex>
+                #include <clipping_planes_vertex>
+			}`;
+
+            material.fragmentShader = customFragment;
+            material.vertexShader = customVertex;
+
+            // we need to set the clipping planes on all elements in the clipped subtree, since each element does its own clipping in their shader
+            // however, the clippingContext is a reference value, so if we update these clipping plane definitions once (in the parent's Update), it will cascade to all these children as well
+            material.clipping = true;
+            material.clippingPlanes = clippingContext.planes;
+
+            console.error("Added clipping to TEXT ELEMENT ", this.domelement, this.clippingContext.authority.domelement );
+
+            this.UpdateClipping(); // position the planes correctly for initialization
+            material.needsUpdate = true;
+        }
+	}
+	
+	/*
     UpdateClipping(){
 
 		// NOTE: we currently assume text elements themselves never have overflow set: always wrap them in a container that does!
@@ -211,5 +325,6 @@ class TextElement extends Element{
 		}
 
 		super.UpdateClipping();
-    }
+	}
+	*/
 }

@@ -474,10 +474,15 @@ function checkKey(e) {
         document.getElementById("imageLeft").addEventListener("mousedown", mousedownHandler );
         */
 
-        // this does NOT trigger mutation events! 
+        // this does NOT trigger mutation events!
+        /* 
         let borderCSS = document.createElement('style');
         borderCSS.innerHTML = "*{ border: 1px solid blue;}"; // .a-enter-vr{position: fixed;} 
         document.body.appendChild(borderCSS);
+        */
+
+        let overflowContainer2 = document.getElementById("overflowContainer2");
+        changeFunctions.animateWidthEl(overflowContainer2);
     }
 
 }
