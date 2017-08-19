@@ -62,8 +62,6 @@ class TextElement extends Element{
 
 		// note: updating the backgroundPlane is done automatically because it is registered as a child of this element. We only need to deal with our own stuff here
         // note that children are fully updated before their parent, so we might override some stuff for the backgroundPlane here if we would need to
-		
-		//console.log("ElementSpecificUpdate TEXT ");
 
 		this._UpdateTextAlignment(element_style);
 
@@ -74,12 +72,19 @@ class TextElement extends Element{
 		else
 			textValue = stripText(this.domelement.innerHTML);
 
+			
+		//console.log("ElementSpecificUpdate TEXT ", textValue);
+
         //this.atext.setAttribute("text", "value: " + stripText(this.domelement.innerHTML) + ";");
         this.atext.setAttribute("text", "value", textValue ); // other inline syntax ("value: " + stripText(this.domelement.innerHTML) + ";") sometimes give strange errors, but only for long text... you go figure
 		//this.atext.getAttribute("text").setAttribute("value", stripText(this.domelement.innerHTML));
 		//this.atext.components["text"].value = stripText(this.domelement.innerHTML);
 
         let domColor = element_style.getPropertyValue("color");
+		let opacity = parseFloat(element_style.getPropertyValue("opacity"));
+
+		if( opacity != 0 && opacity != 1)
+			console.error("DOM COLOR ", domColor, opacity, textValue);
 
         // otherwhise they will show up as black + hiding them helps performance tremendously since they aren't drawn!!! (is the case for most containers -> just make sure to have 1 top-level container that is always drawn)
         if( domColor == this.DOM2AFrame.settings.transparantColor )
@@ -94,6 +99,8 @@ class TextElement extends Element{
 			    this.atext.setAttribute('color', domColor);
             }
         }
+
+		this.atext.setAttribute("opacity", opacity);
 
 
 
@@ -151,6 +158,12 @@ class TextElement extends Element{
 
 		// TODO: make this more neat, now only works for baseline == "top"
 		//xyz.y += (this.position.height / 2) * 0.85;
+
+		// need to take into account top padding! (for some fluke reason, top padding is included in the getClientBoundingRect...)
+		let paddingLeft = element_style.getPropertyValue("padding-left");
+		xyz.x += parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor;
+		//let paddingTop = element_style.getPropertyValue("padding-top");
+		//xyz.y -= parseFloat(paddingTop) * this.position.DOM2AFrameScalingFactor;
 
         this.atext.setAttribute("position", xyz );
 	}

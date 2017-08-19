@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Dom2AFrame - Hologram Demo</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="css/css.css">
+    <link rel="stylesheet" href="css/accordion.css">
+    
+
+    <style>
+
+    </style>
+
+    <script type="text/javascript" src="js/eventListenerListPlugin.js"></script>
+
+    <!-- A-frame -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+
+    <!-- A-frame components -->
+    <script type="text/javascript" src="https://rawgit.com/oscarmarinmiro/aframe-video-controls/master/dist/aframe-video-controls.min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/oscarmarinmiro/aframe-stereo-component/master/dist/aframe-stereo-component.min.js"></script>
+
+</head>
+
+<body>
+
+    <div id="container">
+
+        <div id="leftColumn">
+            <div id="mediaContentContainer">
+
+            </div>
+            <div id="controlsContainer">
+                <div id="formControls">
+                    <input id="textInput" type="text" value="initvalue" style="width: 100%;" /><br/>
+                    <input id="checkboxInput" type="checkbox" value="initvalue"><span>Checkbox input</span><br/>
+                </div>
+                <div id="buttonControls">
+
+                </div>
+            </div>
+        </div>
+        <div id="rightColumn">
+            <!-- 
+               Accordion based on http://css3.bradshawenterprises.com/accordions/
+            -->
+
+            <div id="accordion">
+                <section id="item1">
+                    <p class="pointer">></p><h1>A long paragraph</h1>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur consectetur nunc et eros fermentum, non suscipit arcu fermentum. Fusce id lorem dolor. Aenean molestie neque vitae purus pretium, et sagittis urna auctor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse fringilla justo faucibus rhoncus tincidunt. Integer porttitor et nibh sit amet aliquam. Nam non lectus egestas, blandit dui et, accumsan leo. Maecenas sodales erat sit amet erat pretium, vulputate ultricies tortor rhoncus. Vivamus ultrices nisi id luctus aliquet. Pellentesque faucibus molestie leo, ut venenatis nibh. Nunc eleifend pulvinar tempus.
+                    </p>
+                    <img src="../../framework_comparisons/base/webvr-logo-square.png" style="border: 1px solid black; width: 100px;" />
+                    <p>
+Praesent ipsum velit, interdum id nulla eget, aliquet dapibus nulla. Phasellus varius in elit ut consectetur. Morbi tincidunt tristique ex non euismod. Aliquam id ante vel enim interdum condimentum sed fermentum ipsum. Morbi vehicula sem luctus, ullamcorper urna sed, finibus dui. Etiam in efficitur arcu, at faucibus ex. Maecenas eu orci posuere, fringilla leo eget, consectetur elit. Proin sed turpis sed ante aliquam pretium. Vivamus sodales lorem vitae placerat gravida. Suspendisse ornare mollis ligula ac lacinia. Sed feugiat risus nulla, id bibendum quam accumsan in.
+                    </p>
+                    <p>
+Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac at nisi. Quisque ut tempor ante. Maecenas tellus urna, auctor quis tincidunt vel, efficitur eu nibh. Aenean mattis libero sed consectetur varius. Nulla eleifend massa in dignissim malesuada. Donec lacinia est nisl, et interdum turpis venenatis a. Vivamus fringilla lectus eu metus pulvinar venenatis. </p>
+                    </p>
+                </section>
+                <section id="item2" class="ac_hidden">
+                    <p class="pointer">></p><h1><a href="#">A medium paragraph</a></h1>
+                    <p>
+Praesent ipsum velit, interdum id nulla eget, aliquet dapibus nulla. Phasellus varius in elit ut consectetur. Morbi tincidunt tristique ex non euismod. Aliquam id ante vel enim interdum condimentum sed fermentum ipsum. Morbi vehicula sem luctus, ullamcorper urna sed, finibus dui. Etiam in efficitur arcu, at faucibus ex. Maecenas eu orci posuere, fringilla leo eget, consectetur elit. Proin sed turpis sed ante aliquam pretium. Vivamus sodales lorem vitae placerat gravida. Suspendisse ornare mollis ligula ac lacinia. Sed feugiat risus nulla, id bibendum quam accumsan in.
+                    </p>
+                    <p>
+Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac at nisi. Quisque ut tempor ante. Maecenas tellus urna, auctor quis tincidunt vel, efficitur eu nibh. Aenean mattis libero sed consectetur varius. Nulla eleifend massa in dignissim malesuada. Donec lacinia est nisl, et interdum turpis venenatis a. Vivamus fringilla lectus eu metus pulvinar venenatis. </p>
+                    </p>
+                </section>
+                <section id="item3" class="ac_hidden">
+                    <p class="pointer">></p><h1><a href="#">Two short paragraphs</a></h1>
+                    <p>Pellentesque habitant... </p>
+                    <p>Pellentesque habitant... </p>
+                </section>
+            </div>
+        </div>
+
+    </div>
+    
+
+    <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 800px; min-height: 1000px; padding: 3px;">
+        <!--<canvas width="600" height="800"></canvas>-->
+        <a-scene id="aScene" embedded stats="true" style="width: 800px; height: 1000px">
+            <a-box color="red" position="0 -15 -19" rotation="0 45 45" scale="1 1 1"></a-box>
+            <a-text value="DOM 2 AFRAME" color="red" position="-5 -15 -18" width="50"></a-text>
+            <a-box color="red" position="5 -15 -19" rotation="0 45 45" scale="2 2 2"></a-box>
+            
+            <a-plane id="fullBox" color="green" position="0 0 -21" scale="30 40" visible="false"></a-plane>
+
+            <!--<a-box id="fullBox" color="green" position="0 0 -21" scale="15 15 5" visible="false"></a-box>-->
+            
+
+            <a-entity>
+                <a-camera position="0 0 0" far="90" near="0.5" stereocam="eye:left;" wasd-controls-enabled="true" />
+            </a-entity>
+           
+        </a-scene> 
+    </div>
+
+    <!-- A-frame "conveniently" pulls in their own rs-base classes and adds it in the head dynamically... *sigh* -->
+    <style>
+        .rs-base{
+            position: absolute;
+            z-index: 10000;
+            padding: 10px;
+            background-color: #222;
+            font-size: 10px;
+            line-height: 1.2em;
+            width: 350px;
+            font-family: 'Roboto Condensed', tahoma, sans-serif;
+            right: 0;
+            left: unset;
+            top: 0;
+            overflow: hidden;
+        }
+    </style>
+
+    <!-- TODO: bundle everything up with webpack or something instead of including separate files -->
+    <script type="text/javascript" src="../../framework_comparisons/base/rStats.js"></script>
+   <!-- <script type="text/javascript" src="js/dom2aframe/dom2aframe_v1.js"></script> -->
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/helpers/MouseEventHandler.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/elements/BaseElement.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/elements/ContainerElement.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/elements/ImageElement.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/elements/TextElement.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/DOM2AFrameSettings.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/DOM2AFrame.js"></script>
+    <script type="text/javascript" src="../../framework_comparisons/dom2aframe/js/dom2aframe/a-video-bundle.js"></script>
+    
+    <script type="text/javascript" src="js/hologram.js"></script>
+    <script type="text/javascript">
+        
+       let settings = new DOM2AFrameSettings();
+       settings.startingZindex = -30;
+
+       settings.elementIterationStrategy = settings.elementIterationStrategies.TREE;
+
+       //settings.elementIterationStrategy = settings.elementIterationStrategies.FLAT;
+       //settings.clippingEnabled = false;
+
+    setTimeout( () => {
+            const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container"), settings );
+            DOM2AFrame1.Init(true);
+    }, 5); // note: the timeout is NOT needed, just for testing if it would still work with it on (in some cases, this is not trivial apparently...\)
+
+    </script> 
+
+</body>
+
+</html>

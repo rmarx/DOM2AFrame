@@ -1,0 +1,68 @@
+#accordion section, #accordion .pointer, #accordion h1, #accordion p, #accordion img {
+  transition: all 0.5s ease-in-out;
+}
+#accordion {
+  height: 100%;
+}
+#accordion * {
+    box-sizing: border-box;
+}
+
+#accordion h1 {
+  /*line-height:1.2;*/
+  height: 44px;
+  font-size:20px;
+  background-color:blue;
+  color: #FFF;
+  margin:0;
+  padding: 10px 10px 10px 30px; 
+}
+
+#accordion h1 a {
+  color:inherit;
+  text-decoration: none;
+}
+#accordion section {
+  overflow:hidden;
+  height:86%;
+  border:1px #333 solid;
+  opacity: 1;
+}
+#accordion p {
+  padding:0 10px;
+  color:black;
+  opacity: 1;
+}
+#accordion section.ac_hidden p:not(.pointer) {
+  color:#000;
+  opacity: 0;
+}
+
+#accordion section.ac_hidden {
+  /*height:44px;*/
+  height: 7%;
+}
+/* hack to make sure the h1 gets updated by DOM2AFrame after the animation... TODO: better property caching in DOM2AFrame! */
+#accordion section.ac_hidden h1 {
+  padding-left: 31px;
+}
+
+
+
+#accordion .pointer {
+  padding:0;
+  margin:10px 0 0 6px;
+  line-height:20px;
+  width:13px;
+  position:absolute;
+}
+#accordion section:not(.ac_hidden) h1 {
+  background-color:lightblue;
+  color: #000;
+}
+
+#accordion section:not(.ac_hidden) .pointer {
+  display:block;
+  transform:rotate(90deg);
+  padding:0;
+}

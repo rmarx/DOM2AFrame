@@ -54,7 +54,7 @@ class DOM2AFrame{
             if (IsDragEvent(this))
                 return;
 
-            console.log("DOM2AFrame: updateall");
+            //console.log("DOM2AFrame: updateall");
 
             for (let element of this.elements)
                 element.Update();
@@ -62,6 +62,18 @@ class DOM2AFrame{
             this.state.dirty = false;
             rS('dom2aframe').end();
         }
+    }
+
+    ForceUpdateAll(){
+
+            rS('dom2aframeForced').start();
+
+            console.warn("DOM2AFrame: ForceUpdateAll : shouldn't be called constantly!");
+
+            for (let element of this.elements)
+                element.Update(true, true);
+
+            rS('dom2aframeForced').end();
     }
 
     AddDOMElement(DOMElement){
@@ -86,7 +98,26 @@ class DOM2AFrame{
             //new_a_element.AElement.setAttribute("visible", "false");
         }
         else if( this.settings.textElementTags.has(DOMElement.tagName) ){   
-            new_a_element = new TextElement(this, DOMElement, layer);
+
+            // special situation: <h1><a href="">text</a></h1>
+            // in this type of case, we don't want the h1 to be a text node, since that would duplicate the text with the <a>
+            let children = DOMElement.childNodes;
+            let hasTextNode = false;
+            for( let child of children ){
+                if( child.nodeType == Node.TEXT_NODE ){
+                    hasTextNode = true;
+                    break;
+                }
+            }
+
+            if( hasTextNode ){
+                new_a_element = new TextElement(this, DOMElement, layer);
+            }
+            else{
+                console.warn("DOM2AFrame:AddDOMElement : normal text element replaced by container because it didn't have text nodes!", DOMElement);
+                new_a_element = new ContainerElement(this, DOMElement, layer);
+            }
+            
         }
         else if( this.settings.imageElementTags.has(DOMElement.tagName) ){   
             new_a_element = new ImageElement(this, DOMElement, layer);
@@ -154,7 +185,23 @@ class DOM2AFrame{
 
         this.AFrame.scene.setAttribute("embedded", "true");
 
-        let vrcss = document.createElement('style');
+
+        if (this.AFrame.scene.hasLoaded) {
+            console.log("DOM2AFrame:Init directly");
+            this._Init(debug);
+            this.AFrame.scene.resize(); // for some strange reason, the camera is squashed if we don't force a quick resize here... no idea why
+        } else {
+            console.log("DOM2AFrame:Init delayed");
+            this.AFrame.scene.addEventListener('loaded', () => { this._Init(debug); });
+        }
+
+    }
+
+    _Init(debug = false){
+        console.trace("DOM2AFrame:_Init");
+        let self = this;
+
+        let vrcss = document.createElement('style'); 
         vrcss.innerHTML = "a-scene{width: 600px; height: 600px;}"; // .a-enter-vr{position: fixed;} 
         document.body.appendChild(vrcss);
 
@@ -168,6 +215,7 @@ class DOM2AFrame{
         this.AFrame.container = document.createElement("a-entity");
         this.AFrame.container.setAttribute("id", "aElementContainer");
         this.AFrame.container.setAttribute("position", "0 0 " + this.settings.startingZindex );
+        //this.AFrame.container.setAttribute("rotation", "45 0 0" );
         this.AFrame.scene.appendChild(this.AFrame.container);
 
         //Calc the ammount of pixels in 1 meter
@@ -189,18 +237,22 @@ class DOM2AFrame{
 
         // TODO: FIXME: allow the user to indicate if they want a camera made or not
         //Camera
+        // at this point, the camera HAS to be registered in the scene inside a parent entity before we can do any work, due to a strange bug and unsupportedness in A-Frame
+        // we need to specify the cam here instead of creating it in code -->
+        // this is because a-frame will try to create a default cam if there is none here, but also does this when the .loaded event fires, which we also use to start our stuff
+        // waiting for camera-ready and camera-set-active events led to other bugs (i.e. https://github.com/aframevr/aframe/issues/2860)
+        // https://github.com/aframevr/aframe/blob/master/src/core/scene/a-scene.js
+        // https://github.com/aframevr/aframe/blob/bbc2f0325cdd3c4bd95a69ce4ce9705b0e6a041d/src/systems/camera.js
+
         let cameraFar = 90;
-        let camera_entity = document.createElement("a-entity");
-        //camera_entity.setAttribute("position", body_width/2 + " 0 0");
-        camera_entity.setAttribute("position", "0 0 0");
-        this.AFrame.camera = document.createElement("a-camera");
-        this.AFrame.camera.setAttribute("position", "0 0 0");
-        this.AFrame.camera.setAttribute("user-height", "0");
-        this.AFrame.camera.setAttribute("far", "" + cameraFar);
-        this.AFrame.camera.setAttribute("near", "0.5");
-        this.AFrame.camera.setAttribute("stereocam", "eye:left;");
-        this.AFrame.camera.setAttribute("wasd-controls-enabled", "true");
-        camera_entity.appendChild(this.AFrame.camera);
+        self.AFrame.camera = self.AFrame.scene.camera.el;
+        self.AFrame.camera.setAttribute("position", "0 0 0");
+        self.AFrame.camera.setAttribute("user-height", "0");
+        self.AFrame.camera.setAttribute("far", "" + cameraFar);
+        self.AFrame.camera.setAttribute("near", "0.5");
+        self.AFrame.camera.setAttribute("stereocam", "eye:left;");
+        self.AFrame.camera.setAttribute("wasd-controls-enabled", "true");
+
 
 
 
@@ -237,7 +289,6 @@ class DOM2AFrame{
 
 
         // TODO: make this mor resilient if we don't control the a-scene in hte first place
-        let self = this;
         let enterVr = function () {
             self.UpdateAll();
             vrcss.innerHTML = ".a-enter-vr{position: fixed;} a-scene{height:0;} .a-canvas{ display: default; }";
@@ -252,7 +303,6 @@ class DOM2AFrame{
 
         this.AFrame.scene.addEventListener("enter-vr", enterVr);
         this.AFrame.scene.addEventListener("exit-vr", exitVr);
-        this.AFrame.scene.appendChild(camera_entity);
 
         /*
         video_element = new VideoElement(body_width / 2 + " 0 0");
@@ -274,7 +324,7 @@ class DOM2AFrame{
         //DOMContainerHeight *= 0.85; // for some reason, this aligns better with our camera for now // TODO: FIXME: do better initial positioning! 
 
         console.log("Setting AFrame container position", "" + (-DOMContainerWidth/2) + " " + (DOMContainerHeight/2) + " " + this.settings.startingZindex)
-        this.AFrame.container.setAttribute("position", "" + (-DOMContainerWidth/2) + " " + (DOMContainerHeight/2) + " " + this.settings.startingZindex);
+        this.AFrame.container.setAttribute("position",   "" + (-DOMContainerWidth/2) + " " + (DOMContainerHeight/2) + " " + this.settings.startingZindex);
 
 
         // TODO: FIXME: allow user to pass a parent element for a created a-scene
@@ -297,13 +347,16 @@ class DOM2AFrame{
          // TODO: make sure the THREE.js renderer is always available here already!
         if( !this.AFrame.scene.renderer )
             this.AFrame.scene.addEventListener("render-target-loaded", () => { 
+                
                 this.AFrame.scene.renderer.localClippingEnabled = true; }, {once: true});
         else
+        {
             this.AFrame.scene.renderer.localClippingEnabled = true;
+        }
 
         this._TransformFullDOM();
 
-    } // Init()
+    } // _Init()
 
     _TransformFullDOM(){
 

@@ -125,8 +125,10 @@ class Element{
         this.domelement.addEventListener("animationstart",  this.StartAnimation.bind(this));
         this.domelement.addEventListener("animationend",    this.StopAnimation.bind(this));
 
-        //Listenes for transition changes, only works on Microsoft Edge
+        //Listenes for transition changes, only works on Microsoft Edge and should work on FF but not Chrome https://developer.mozilla.org/en-US/docs/Web/Events/transitionstart#Browser_compatibility
         this.domelement.addEventListener("transitionstart", this.StartAnimation.bind(this));
+        
+        //This does work on chrome and other browsers: https://developer.mozilla.org/en-US/docs/Web/Events/transitionend
         this.domelement.addEventListener("transitionend",   this.StopAnimation.bind(this));
         
         // for form elements 
@@ -165,11 +167,30 @@ class Element{
         if( evt.target == this.domelement )
             evt.stopPropagation();
 
-        console.log("ANIMATION STOPPED", (evt.target == this.domelement), evt);
-        console.log("%c ANIMATION STOPPED", "background-color: red; color: white; font-size: 2em;");
-        console.error("ANIMATION STOPPED", this);
+        //console.log("ANIMATION STOPPED", (evt.target == this.domelement), evt);
+        //console.log("%c ANIMATION STOPPED", "background-color: red; color: white; font-size: 2em;");
+        //console.error("ANIMATION STOPPED", this);
         this.StopIntervall();
         this.UpdateAnimation();
+
+        // simply updating ourselves and children might not be enough
+        // for now, we just go 2 levels up and update all those children
+        // TODO: do this better! figure out what actually changed and only update that with a caching system, see also .Update()
+        // FIXME: this won't even work because we don't add the d2aelements as children... damnit
+        /*
+        if( this.domelement.parentNode && this.domelement.parentNode.parentNode &&  this.domelement.parentNode.parentNode.d2aelement ){
+            console.error("Force updating after animation 1: ", this.domelement.parentNode.parentNode);
+            this.domelement.parentNode.parentNode.d2aelement.Update(true, true);
+        }
+        else if( this.domelement.parentNode && this.domelement.parentNode.d2aelement ){
+            console.error("Force updating after animation 2: ", this.domelement.parentNode);
+            this.domelement.parentNode.d2aelement.Update(true, true);
+        }
+        else{
+            console.error("Force updating after animation 3: NOTHING!");
+        }
+        */
+
     }
 
     StopIntervall(){
@@ -204,7 +225,7 @@ class Element{
 
     //Gets called on the object that invokes the whole update chain, which is garanteed to be dirty
     HandleMutation(mutation){
-        console.trace("%c HandleMutation triggered", "color: yellow; background-color: black;", mutation, this);
+        //console.trace("%c HandleMutation triggered", "color: yellow; background-color: black;", mutation, this);
         this.dirty = true;
         //this.Update();
         this.DOM2AFrame.state.dirty = true;
@@ -223,7 +244,8 @@ class Element{
 
         if(updateChildren){
             for( let child of this.children )
-                child.Update(forceUpdate, updateChildren);
+                child.Update(forceUpdate || this.dirty, updateChildren); 
+            //TODO: update this logic! the || this.dirty is a hack for now to force children to update (e.g. positions stay the same but colors change) but this can still miss necessary updates in siblings or parents!
         }
 
         // we don't get Mutation events if it's just the position that has changed indirectly (due to a style change on another element for example)
@@ -237,7 +259,7 @@ class Element{
         //console.log("UPDATE TRIGGERED ", (this.position.EqualsDOMPosition(DOMPosition)), this.dirty, forceUpdate, this.domelement);
 
         //Cache the last position
-        this.position.UpdateFromDOMPosition(DOMPosition);
+        this.position.UpdateFromDOMPosition(DOMPosition); // this is just the calculation: actual setting happens in the ElementSpecificUpdate to allow more fine-grained control
         
 
         var element_style = window.getComputedStyle(this.domelement);
@@ -262,6 +284,17 @@ class Element{
         
         // TODO: needed because THREE.BoxHelper doesn't automatically follow changes to the underlying mesh. Find some way to update the boxhelper without re-creating it every time
         // NOTE: this commented-out code didn't work... borders just disappear... *headdesk*
+        // what is PROBABLY going wrong here:
+        // - the BoxHelper is going to use the bounding box of the element in WORLD coordinates
+        // - so plane is taken, bounding box calculated to be correct, placed in WORLD coordinates, added to the element with setObject3D
+        //      -> this causes the object's bounding box to grow! since new 3D info is added way behind it (in our case: at z -30)
+        // - on the next update, this is the new bounding box and the boxhelper is added for this bounding box (doesn't change shape because we're good in WORLD coords right now)
+        // -> in practice, our borders are shifted to the back of the scene, seemingly invisible until we look with the a-frame inspector... derp
+        // ! have confirmed that boxes do rotate! it's primarily the positioning that is bogus
+        // TODO: try to add separate a-entity specifically for the borders and use that for positioning after the original initiationlization
+            // -> BUT! this will not work when we start rotating planes? since this also messes with the bounding box? so we would need to keep a copy of the plane, Axis-aligned, update that, then update the borders, then rotate the borders... dude
+            // -> first look into the proper border options, like 
+            // FIRST: Helpers are designed to be added directly as children of the scene -- not as children of the target object, or any other object.
         /*
         if( !this.elWidthForBorders )
             this.elWidthForBorders = this.position.width;
@@ -277,18 +310,43 @@ class Element{
         */
 
         
-		if( !this.borderObject ){
-			let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
+        // // TODO: make more efficient https://threejs.org/docs/#manual/introduction/How-to-update-things
+		// if( !this.borderObject ){ 
+		// 	let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
 
-			// this works, but linewidth isn't adjustable 
-			// TODO: change to https://stackoverflow.com/questions/11638883/thickness-of-lines-using-three-linebasicmaterial or https://stemkoski.github.io/Three.js/Outline.html 
-			var box = new THREE.BoxHelper( /*this.aelement.object3D*/ threePlane, 0x00ff00 );
-			box.material.lineWidth = 1; // for some reason, this doesn't work on windows platforms: https://threejs.org/docs/#api/materials/LineBasicMaterial
-			box.material.color = {r: 0, g: 0, b: 0};
-			box.material.needsUpdate = true;
-			this.aelement.setObject3D('border', box);
-			this.borderObject = box;
-		}
+        //     /*
+		// 	// this works, but linewidth isn't adjustable 
+		// 	// TODO: change to https://stackoverflow.com/questions/11638883/thickness-of-lines-using-three-linebasicmaterial or https://stemkoski.github.io/Three.js/Outline.html 
+		// 	var box = new THREE.BoxHelper( threePlane, 0x00ff00 );
+		// 	box.material.lineWidth = 1; // for some reason, this doesn't work on windows platforms: https://threejs.org/docs/#api/materials/LineBasicMaterial
+		// 	box.material.color = {r: 1, g: 1, b: 1};
+		// 	box.material.needsUpdate = true;
+		// 	//this.aelement.setObject3D('border', box);
+        //     this.DOM2AFrame.AFrame.scene.object3D.add( box );
+		// 	this.borderObject = box;
+        //     */
+
+        //     // https://threejs.org/docs/#api/geometries/EdgesGeometry
+        //     var edges = new THREE.EdgesGeometry( threePlane.geometry );
+        //     var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+        //     //this.DOM2AFrame.AFrame.scene.object3D.add( line );
+		// 	this.aelement.setObject3D('border', line);
+        //     this.borderObject = line;
+
+		// }
+        // else
+        //     this.borderObject.update(this.aelement.object3D.children[0]);
+
+        // TODO: make more efficient https://threejs.org/docs/#manual/introduction/How-to-update-things
+
+        let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
+
+        // https://threejs.org/docs/#api/geometries/EdgesGeometry
+        var edges = new THREE.EdgesGeometry( threePlane.geometry );
+        var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
+        this.aelement.setObject3D('border', line); // will auto-remove existing border object if any
+        this.borderObject = line;
+
 		
 		let borderWidth = parseFloat(element_style.borderWidth);
         if( this.customBorder )
@@ -316,10 +374,13 @@ class Element{
                     this.borderObject.material.color = {r: Number(match[1]) / 256, g: Number(match[2]) / 256, b: Number(match[3]) / 256};
                 }
             }
-
 		}
 		
 		this.borderObject.material.needsUpdate = true;
+        //console.error("Border updated", this.borderObject.material, this.domelement);
+        
+        if( this.domelement.getAttribute("id") == "item1")
+            console.error("BORDE POSITIONS", this.borderObject.geometry.attributes.position);
 	}
 
     // ex. GetAsset("http://google.com/logo.png", "img")

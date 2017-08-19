@@ -1,0 +1,53 @@
+body {
+	background-color: white;
+    font-family: "Roboto", sans-serif;
+}
+
+#container{
+    width: 800px;
+    height: 600px;
+    float: left;
+}
+
+#leftColumn{
+    float: left;
+    width: 450px;
+    height: 100%;
+    background-color: #FF0000;
+}
+    #mediaContentContainer{
+        height: 499px;
+    }
+
+    #controlsContainer{
+        height: 100px;
+    }
+        #formControls{
+            box-sizing: border-box;
+            padding: 10px;
+            width: 50%;
+            height: 100%;
+            border: 1px solid black;
+            float: left;
+        }
+
+        #buttonControls{
+            width: 49%;
+            height: 100%;
+            border: 1px solid black;
+            float: left;
+        }
+
+#rightColumn{
+    float: left;
+    width: 350px;
+    height: 100%;
+    background-color: #00FF00;
+}
+
+
+/*
+#rightColumn::after{
+    clear: both;
+}
+*/
