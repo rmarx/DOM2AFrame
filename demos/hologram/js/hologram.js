@@ -1,9 +1,11 @@
 $(document).ready(function() {
   $("#accordion section h1").click(function(e) {
-    $(this).parents().siblings("section").addClass("ac_hidden");
+    $(this).parent().siblings("section").addClass("ac_hidden");
     $(this).parents("section").removeClass("ac_hidden");
 
     console.log("Accordion section clicked!", this);
+
+    Log.ResetUpdateLoop();
 
 /*
     $("#accordion section h1").each(function(index){

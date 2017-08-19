@@ -83,8 +83,8 @@ class TextElement extends Element{
         let domColor = element_style.getPropertyValue("color");
 		let opacity = parseFloat(element_style.getPropertyValue("opacity"));
 
-		if( opacity != 0 && opacity != 1)
-			console.error("DOM COLOR ", domColor, opacity, textValue);
+		//if( opacity != 0 && opacity != 1)
+		//		console.error("DOM COLOR ", domColor, opacity, textValue);
 
         // otherwhise they will show up as black + hiding them helps performance tremendously since they aren't drawn!!! (is the case for most containers -> just make sure to have 1 top-level container that is always drawn)
         if( domColor == this.DOM2AFrame.settings.transparantColor )

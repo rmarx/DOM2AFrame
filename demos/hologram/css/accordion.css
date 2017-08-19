@@ -1,4 +1,4 @@
-#accordion section, #accordion .pointer, #accordion h1, #accordion p, #accordion img {
+#accordion section, #accordion .pointer, #accordion h1, #accordion p, #accordion a, #accordion img {
   transition: all 0.5s ease-in-out;
 }
 #accordion {
@@ -19,7 +19,7 @@
 }
 
 #accordion h1 a {
-  color:inherit;
+  color: #FFF;
   text-decoration: none;
 }
 #accordion section {
@@ -43,9 +43,11 @@
   height: 7%;
 }
 /* hack to make sure the h1 gets updated by DOM2AFrame after the animation... TODO: better property caching in DOM2AFrame! */
+/*
 #accordion section.ac_hidden h1 {
   padding-left: 31px;
 }
+*/
 
 
 
@@ -58,6 +60,9 @@
 }
 #accordion section:not(.ac_hidden) h1 {
   background-color:lightblue;
+  color: #000;
+}
+#accordion section:not(.ac_hidden) h1 a {
   color: #000;
 }
 

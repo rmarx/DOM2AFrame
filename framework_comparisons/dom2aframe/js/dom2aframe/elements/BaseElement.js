@@ -225,6 +225,7 @@ class Element{
 
     //Gets called on the object that invokes the whole update chain, which is garanteed to be dirty
     HandleMutation(mutation){
+        Log.OnElementMutated(this, mutation);
         //console.trace("%c HandleMutation triggered", "color: yellow; background-color: black;", mutation, this);
         this.dirty = true;
         //this.Update();
@@ -249,20 +250,40 @@ class Element{
         }
 
         // we don't get Mutation events if it's just the position that has changed indirectly (due to a style change on another element for example)
-        // so we also need to check if our current position is still valid and not only depend on this.dirty to make decisions 
+        // so we also need to check if our current position and a select few styles are still valid and not only depend on this.dirty to make decisions 
         var DOMPosition = this.domelement.getBoundingClientRect();
+        var element_style = window.getComputedStyle(this.domelement);
+
+        // todo: make this a much more generic cache! 
+        let somethingChanged = false;
+        if( !this.colorCache )
+            this.colorCache = "";
+        if( !this.opacityCache )
+            this.opacityCache = "";
+
+        if( element_style.getPropertyValue("color") != this.colorCache){
+            this.colorCache = element_style.getPropertyValue("color");
+            somethingChanged = true;
+        }
+
+        if( element_style.getPropertyValue("opacity") != this.opacityCache){
+            this.opacityCache = element_style.getPropertyValue("opacity");
+            somethingChanged = true;
+        }
 
         //Check if something changed since last time, else we just stop the update
-        if(this.position.EqualsDOMPosition(DOMPosition) && !this.dirty && !forceUpdate)
+        if(this.position.EqualsDOMPosition(DOMPosition) && !somethingChanged && !this.dirty && !forceUpdate)
             return;
 
-        //console.log("UPDATE TRIGGERED ", (this.position.EqualsDOMPosition(DOMPosition)), this.dirty, forceUpdate, this.domelement);
+        //if( !forceUpdate && !this.dirty )
+        Log.OnElementUpdated(this, this.dirty, forceUpdate);
+
+        //console.trace("UPDATE TRIGGERED ", Date.now(), this.domelement);
 
         //Cache the last position
         this.position.UpdateFromDOMPosition(DOMPosition); // this is just the calculation: actual setting happens in the ElementSpecificUpdate to allow more fine-grained control
         
 
-        var element_style = window.getComputedStyle(this.domelement);
 
         //Set the opacity of the element
         var new_opacity = 0;
