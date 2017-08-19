@@ -12,8 +12,8 @@ class Position{
 
     constructor(DOMPosition, depthModifier, DOMPixelsPerUnit){
 		this.depthModifier = depthModifier;
-		this.UpdateFromDOMPosition(DOMPosition);
         this.DOMPixelsPerUnit = DOMPixelsPerUnit;
+		this.UpdateFromDOMPosition(DOMPosition);
     }
 
 	UpdateFromDOMPosition(DOMPosition){
@@ -25,7 +25,10 @@ class Position{
 	CalculateAFramePosition(DOMPosition){
 		// DOMPosition is the return value of domelement.getBoundingClientRect();
 		// it has fields .top, .bottom, .left and .right
-		// in the DOM, the origin is on the TOP LEFT
+        // in the DOM, the origin is on the TOP LEFT
+        
+        if( !this.DOMPixelsPerUnit )
+            console.error("position:DOMPixelsPerUnit not set!!", this);
 
 		// AFramePosition needs to be in the AFrame coordinate system, which uses x, y and z values and a local origin/pivot at the CENTER of the element
 		// In our setup, we just convert into x and y from width and height and keep the "global origin is on the TOP LEFT" idea
@@ -47,7 +50,10 @@ class Position{
 		output.z *= this.DOM2AFrameScalingFactor; // future proofing the code
 
 		output.width = width * this.DOM2AFrameScalingFactor;
-		output.height = height * this.DOM2AFrameScalingFactor;
+        output.height = height * this.DOM2AFrameScalingFactor; 
+        
+        if( isNaN(output.x) || isNaN(output.y) )
+            console.error("NAN found in position!", output);
 
 		return output;
 	}
@@ -92,9 +98,13 @@ class Element{
         this.domelement.d2aelement = this; // so we can do a reverse lookup if need be (not used by our core setup, but handy for debugging)
 		this.aelement = null; // is supposed to be filled in by object creator or, more usually, a subclass constructor
 
-        this.children = new Set();
+        this.parts = new Set(); // an Element can be composed of other elements (see for example TextElement, which has a background Container and a foreground Text)
 
         this.position = new Position( this.domelement.getBoundingClientRect(), layer, this.DOM2AFrame.settings.DOMPixelsPerUnit );
+
+        this.cache = new PropertyCache();
+        this.cache.Register("color");
+        this.cache.Register("opacity");
 
         //Flag for when we need to redraw
         this._dirty = false;
@@ -159,19 +169,28 @@ class Element{
         if( evt.target == this.domelement )
             evt.stopPropagation();
 
-        this.StopIntervall();
-        this.interval = setInterval(this.UpdateAnimation.bind(this), 1000/this.DOM2AFrame.requestedFPS);
+        //this.StopIntervall();
+        //this.interval = setInterval(this.UpdateAnimation.bind(this), 1000/this.DOM2AFrame.requestedFPS);
+        this.animating = true;
+        this.DOM2AFrame.StartAnimationLoop();
     }
 
     StopAnimation(evt){
         if( evt.target == this.domelement )
             evt.stopPropagation();
 
+        // for example, in chrome we do get transitionEnd but not transitionStart
+        // so we can get StopAnimation without actually having started the animation! 
+        if( this.animating ){
+            this.animating = false;
+            this.DOM2AFrame.StopAnimationLoop();
+        }
         //console.log("ANIMATION STOPPED", (evt.target == this.domelement), evt);
         //console.log("%c ANIMATION STOPPED", "background-color: red; color: white; font-size: 2em;");
         //console.error("ANIMATION STOPPED", this);
-        this.StopIntervall();
-        this.UpdateAnimation();
+
+        //this.StopIntervall();
+        //this.UpdateAnimation();
 
         // simply updating ourselves and children might not be enough
         // for now, we just go 2 levels up and update all those children
@@ -193,16 +212,20 @@ class Element{
 
     }
 
+    /*
     StopIntervall(){
         clearInterval(this.interval);            
     }
+    */
 
+    /*
     //Update for one Animation frame
     UpdateAnimation(){
         this.HandleMutation();
         //this.DOM2AFrame.UpdateAll();
         //UpdateAll.bind(this).call();
     }
+    */
 
     get dirty()
     {
@@ -229,7 +252,7 @@ class Element{
         //console.trace("%c HandleMutation triggered", "color: yellow; background-color: black;", mutation, this);
         this.dirty = true;
         //this.Update();
-        this.DOM2AFrame.state.dirty = true;
+        //this.DOM2AFrame.state.dirty = true;
         this.DOM2AFrame.UpdateAll(); // TODO : FIXME: for now, we're bubbling up (so basically redrawing everything) but eventually we want to only update the changed parts and their children!
     }
 
@@ -237,23 +260,37 @@ class Element{
     Init(){
         this._SetupClipping();
         
-        for( let child of this.children )
-            child.Init();
+        for( let part of this.parts )
+            part.Init();
     }
 
-    Update(forceUpdate = false, updateChildren = true){
+    // update Phase 1 function
+    // does the computationally complex browser calls (things that can trigger layouting and so need to be batched for best performance)
+    // and compares the results to cached values to be used in Phase 2 (Update())
+    UpdateCaches(){
+        var DOMPosition = this.domelement.getBoundingClientRect();
+        var element_style = window.getComputedStyle(this.domelement);
 
-        if(updateChildren){
-            for( let child of this.children )
-                child.Update(forceUpdate || this.dirty, updateChildren); 
-            //TODO: update this logic! the || this.dirty is a hack for now to force children to update (e.g. positions stay the same but colors change) but this can still miss necessary updates in siblings or parents!
+        this.cache.UpdateFromBoundingRect(DOMPosition, this.position);
+        this.cache.UpdateFromComputedStyle(element_style);
+
+        for( let part of this.parts ) // TODO: move this to an AddPart() function or something
+            part.cache = this.cache;
+    }
+
+    Update(forceUpdate = false, updateParts = true){
+
+        // we update the sub"Parts" here before the rest so we can override some of their behaviour in the main element if needed
+        if(updateParts){
+            for( let part of this.parts )
+                part.Update(forceUpdate || this.dirty, updateParts); 
+            //TODO: update this logic! the || this.dirty is a hack for now to force parts to update (e.g. positions stay the same but colors change) but this can still miss necessary updates in siblings or parents!
         }
 
         // we don't get Mutation events if it's just the position that has changed indirectly (due to a style change on another element for example)
         // so we also need to check if our current position and a select few styles are still valid and not only depend on this.dirty to make decisions 
-        var DOMPosition = this.domelement.getBoundingClientRect();
-        var element_style = window.getComputedStyle(this.domelement);
 
+        /*
         // todo: make this a much more generic cache! 
         let somethingChanged = false;
         if( !this.colorCache )
@@ -270,9 +307,12 @@ class Element{
             this.opacityCache = element_style.getPropertyValue("opacity");
             somethingChanged = true;
         }
-
         //Check if something changed since last time, else we just stop the update
-        if(this.position.EqualsDOMPosition(DOMPosition) && !somethingChanged && !this.dirty && !forceUpdate)
+        if(this.position.EqualsDOMPosition(DOMPosition) && !somethingChanged && !this.animating && !this.dirty && !forceUpdate)
+            return;
+        */
+
+        if( !this.cache.SomethingChanged() && !this.animating && !this.dirty && !forceUpdate)
             return;
 
         //if( !forceUpdate && !this.dirty )
@@ -281,14 +321,16 @@ class Element{
         //console.trace("UPDATE TRIGGERED ", Date.now(), this.domelement);
 
         //Cache the last position
-        this.position.UpdateFromDOMPosition(DOMPosition); // this is just the calculation: actual setting happens in the ElementSpecificUpdate to allow more fine-grained control
+        //this.position.UpdateFromDOMPosition(DOMPosition); // this is just the calculation: actual setting happens in the ElementSpecificUpdate to allow more fine-grained control
         
+        let element_style = this.cache.computedStyle;
 
 
         //Set the opacity of the element
+        // TODO: add these to cache? 
         var new_opacity = 0;
         if(element_style.getPropertyValue("visibility") !== "hidden" && element_style.getPropertyValue("display") !== "none")
-            new_opacity = parseFloat(element_style.getPropertyValue("opacity"));
+            new_opacity = parseFloat( this.cache.GetValue("opacity") );
     	//this.aelement.setAttribute("opacity", "");
     	this.aelement.setAttribute("opacity", new_opacity);
 
@@ -367,6 +409,12 @@ class Element{
         var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
         this.aelement.setObject3D('border', line); // will auto-remove existing border object if any
         this.borderObject = line;
+
+        if( this.clippingContext ){
+            line.material.clipping = true;
+            line.material.clippingPlanes = this.clippingContext.planes;
+            line.material.needsUpdate = true;
+        }
 
 		
 		let borderWidth = parseFloat(element_style.borderWidth);

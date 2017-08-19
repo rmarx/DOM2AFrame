@@ -7,7 +7,7 @@ $(document).ready(function() {
 
     Log.ResetUpdateLoop();
 
-/*
+    /*
     $("#accordion section h1").each(function(index){
       let el = this;
     console.log("Trying to trigger transition", el);
@@ -17,6 +17,7 @@ $(document).ready(function() {
       }
     });
     */
+    
     
     if( this.d2aelement ){
         //console.error("HOLOGRAM ACCORDION CUSTOM TRIGGER TRANSITION!", this);

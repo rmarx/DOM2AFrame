@@ -33,7 +33,7 @@ class TextElement extends Element{
 		this.aelement.appendChild(this.backgroundPlane.AElement );
 		this.aelement.appendChild(this.atext );
 
-        this.children.add( this.backgroundPlane  );
+        this.parts.add( this.backgroundPlane  );
 
         this.atext.setAttribute("align", "left"); 
 		this.atext.setAttribute("anchor", "left"); // for some reason, anchor moves the pivot of the text element as well, but our coordinates are always relative to the CENTER 
@@ -61,7 +61,7 @@ class TextElement extends Element{
 	ElementSpecificUpdate(element_style){
 
 		// note: updating the backgroundPlane is done automatically because it is registered as a child of this element. We only need to deal with our own stuff here
-        // note that children are fully updated before their parent, so we might override some stuff for the backgroundPlane here if we would need to
+        // note that parts are fully updated before their "parent", so we might override some stuff for the backgroundPlane here if we would need to
 
 		this._UpdateTextAlignment(element_style);
 

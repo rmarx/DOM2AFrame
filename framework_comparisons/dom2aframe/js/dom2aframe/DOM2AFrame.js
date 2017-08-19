@@ -35,6 +35,27 @@ class DOM2AFrame{
         // NOTE: we could use this.AFrame.assets.childCount or something similar, but this gives problems when assets are deleted 
 
         this.state.currentLayerDepth = 0;
+
+        this.animationLoops = 0;
+        this.maxUpdateDuration = 0; // debugging
+    }
+
+
+    StartAnimationLoop(){
+        this.animationLoops += 1;
+        if( this.animationLoops == 1 ){
+            this.maxUpdateDuration = 0; // debugging
+            window.requestAnimationFrame( this.UpdateAll.bind(this) );
+        }
+    }
+
+    StopAnimationLoop(){
+        this.animationLoops -= 1;
+        this.UpdateAll(); // final update after all loops have ended
+    }
+
+    IsAnimating(){
+        return this.animationLoops >= 1;
     }
 
     UpdateAll(){
@@ -46,24 +67,40 @@ class DOM2AFrame{
         // The elements shouldn't only update for mutations however: if a mutation in 1 element causes other elements to shift (e.g. a floating div becomes too wide and pushes others down)
         // the impacted elements WON'T get a mutation event... so we need to check if their positions changed as well to decide if we need to update their AElements
 
-        if ( this.state.updateAll && this.state.dirty ) {
+        // a special case are animations: if an animation is running, we want UpdateAll to be called at ~60FPS
+        // (actually, we want the animated objects to be updates at 60FPS, but for various reasons there is no way to know exactly which objects are changing due to an animation, so we still want to check all)
+        // this is done using the *AnimationLoops() methods and RequestAnimationFrame : as long as there is at least 1 animation running in the scene, UpdateAll will be called at maximum framerate
 
-            rS('dom2aframe').start();
+        // don't update while dragging
+        if ( this.state.updateAll && !IsDragEvent(this) ){
 
-            //Stop everything from updating when dragging
-            if (IsDragEvent(this))
-                return;
+            this.AFrame.scene.components.stats.stats('dom2aframe').start();
 
             //console.log("DOM2AFrame: updateall");
 
             for (let element of this.elements)
+                element.UpdateCaches();
+
+            for (let element of this.elements)
                 element.Update();
 
-            this.state.dirty = false;
-            rS('dom2aframe').end();
+            this.AFrame.scene.components.stats.stats('dom2aframe').end();
+            let updateDuration = this.AFrame.scene.components.stats.stats('dom2aframe').value();
+            
+             // debugging
+            if( updateDuration > this.maxUpdateDuration ){
+                this.maxUpdateDuration = updateDuration;
+                this.AFrame.scene.components.stats.stats("updateAllMax").set( this.maxUpdateDuration );
+            }
+            this.AFrame.scene.components.stats.stats("animationLoops").set( this.animationLoops );
+        }
+
+        if( this.IsAnimating() ){
+            window.requestAnimationFrame( this.UpdateAll.bind(this) );
         }
     }
 
+    /*
     ForceUpdateAll(){
 
             rS('dom2aframeForced').start();
@@ -75,6 +112,7 @@ class DOM2AFrame{
 
             rS('dom2aframeForced').end();
     }
+    */
 
     AddDOMElement(DOMElement){
 
@@ -138,13 +176,13 @@ class DOM2AFrame{
         // otherwise, we might update some attributes, which are then replace by a-frame's default attributes immediately after 
         let onLoaded = (event) => {
             new_a_element.Init();
+            new_a_element.UpdateCaches();
             new_a_element.Update(true);
-            new_a_element.AElement.removeEventListener("play", onLoaded);
         };
 
         // "loaded" event was too soon: setAttribute wasn't always used then. play seems to do the trick
         // https://aframe.io/docs/0.6.0/core/entity.html#events_loaded
-        new_a_element.AElement.addEventListener("play", onLoaded);
+        new_a_element.AElement.addEventListener("play", onLoaded, {once: true});
         this.AFrame.container.appendChild(new_a_element.AElement);
         //new_a_element.update(true); // toon soon, need to wait until appendChild is done, see event handler above
 

@@ -66,6 +66,9 @@ class ContainerElement extends Element{
 			}
 		}
 
+		if( isNaN(this.position.x) || isNaN(this.position.y) )
+			console.trace("Found NaN positions!");
+		
 		this.aelement.setAttribute('position', this.position.xyz );
 
 		this.UpdateBorders(element_style);

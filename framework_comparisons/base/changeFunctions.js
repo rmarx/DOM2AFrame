@@ -181,6 +181,9 @@
 
             for( let functionName of functionNames )
             {
+                if( functionName == "animateWidthEl" )
+                    continue;
+                
                 let timeout = changeFunctions[ functionName ]();
                 timeout *= 1000; 
 
