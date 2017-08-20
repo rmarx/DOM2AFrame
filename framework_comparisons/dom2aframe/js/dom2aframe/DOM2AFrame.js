@@ -76,7 +76,7 @@ class DOM2AFrame{
 
             this.AFrame.scene.components.stats.stats('dom2aframe').start();
 
-            //console.log("DOM2AFrame: updateall");
+            console.log("DOM2AFrame: updateall");
 
             for (let element of this.elements)
                 element.UpdateCaches();

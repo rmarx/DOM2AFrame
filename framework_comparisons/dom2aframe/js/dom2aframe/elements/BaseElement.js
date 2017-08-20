@@ -105,9 +105,12 @@ class Element{
         this.cache = new PropertyCache();
         this.cache.Register("color");
         this.cache.Register("opacity");
+        this.cache.Register("visibility");
+        this.cache.Register("display");
 
         //Flag for when we need to redraw
         this._dirty = false;
+        this.animating = false;
 	}
 
     // supposed to be called in the ctor of inheriting elements after their .aelement has been assigned
@@ -249,7 +252,7 @@ class Element{
     //Gets called on the object that invokes the whole update chain, which is garanteed to be dirty
     HandleMutation(mutation){
         Log.OnElementMutated(this, mutation);
-        //console.trace("%c HandleMutation triggered", "color: yellow; background-color: black;", mutation, this);
+        console.trace("%c HandleMutation triggered", "color: yellow; background-color: black;", mutation, this);
         this.dirty = true;
         //this.Update();
         //this.DOM2AFrame.state.dirty = true;
@@ -330,14 +333,21 @@ class Element{
         
         let element_style = this.cache.computedStyle;
 
-
+        /*
         //Set the opacity of the element
         // TODO: add these to cache? 
         var new_opacity = 0;
         if(element_style.getPropertyValue("visibility") !== "hidden" && element_style.getPropertyValue("display") !== "none")
             new_opacity = parseFloat( this.cache.GetValue("opacity") );
     	//this.aelement.setAttribute("opacity", "");
-    	this.aelement.setAttribute("opacity", new_opacity);
+        this.aelement.setAttribute("opacity", new_opacity);
+        */
+        
+        if(element_style.getPropertyValue("visibility") === "hidden" || element_style.getPropertyValue("display") === "none")
+            this.aelement.setAttribute("visible", false);
+        else
+            this.aelement.setAttribute("visible", true);
+
 
         
         this.ElementSpecificUpdate(element_style);
