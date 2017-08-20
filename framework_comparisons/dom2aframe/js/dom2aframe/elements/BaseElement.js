@@ -274,8 +274,13 @@ class Element{
         this.cache.UpdateFromBoundingRect(DOMPosition, this.position);
         this.cache.UpdateFromComputedStyle(element_style);
 
-        for( let part of this.parts ) // TODO: move this to an AddPart() function or something
-            part.cache = this.cache;
+        // TODO: we could also just do part.UpdateCaches() but that would re-calculate the bounding rect and computedstyle, while they are the same because the parts share our domelement
+        // this should be quicker, BUT we introduce some sharing (parts no longer have their own caches) and we can't just do part.position = this.position because of this (since parts may want to update their positions, see for example how we handle Text alignment in TextElement)
+        // so, we need to decide if part.cache = this.cache won't lead to strange behaviour in more complex cases later down the road
+        for( let part of this.parts ){
+            part.position.UpdateFromDOMPosition(DOMPosition);
+            part.cache = this.cache; // TODO: move this to an AddPart() function or something
+        }
     }
 
     Update(forceUpdate = false, updateParts = true){
