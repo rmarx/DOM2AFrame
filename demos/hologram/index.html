@@ -31,15 +31,28 @@
 
         <div id="leftColumn">
             <div id="mediaContentContainer">
-
+                <!-- 
+                    Hologram options:
+                    https://threejs.org/examples/webgl_loader_collada_skinning.html 
+                    http://alteredqualia.com/three/examples/webgl_animation_skinning_tf2.html
+                    https://threejs.org/examples/#webgl_animation_skinning_blending 
+                    http://unboring.net/workflows/animation.html 
+                -->
+                <div id="hologramCanvas"></div>
             </div>
             <div id="controlsContainer">
-                <div id="formControls">
-                    <input id="textInput" type="text" value="initvalue" style="width: 100%;" /><br/>
-                    <input id="checkboxInput" type="checkbox" value="initvalue"><span>Checkbox input</span><br/>
+                <div id="buttonControls" style="text-align: center;">
+                    <div style="float: left; width: 49%;">
+                        <span>Hologram:</span>  <br/> <br/><button id="hologramToggleButton" type="button">ON</button>
+                    </div>
+                    <div style="float: left; width: 49%;">
+                        <span>Video: </span>  <br/> <br/><button id="videoToggleButton" type="button">FLAT</button>
+                    </div>
                 </div>
-                <div id="buttonControls">
-
+                <div id="consoleControls">
+                    <input id="checkboxInput" type="checkbox" value="initvalue"><span>TODO </span>
+                    <input id="consoleInput" type="text" value="Command" style="width: 50%;" />
+                    <button id="consoleSendButton" type="button">SEND</button>
                 </div>
             </div>
         </div>
@@ -142,6 +155,13 @@ Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac 
     <script type="text/javascript" src="js/hologram.js"></script>
     <script type="text/javascript">
         
+        $(document).ready(function(){
+            hologramScene = new HologramScene( holograms );
+            let hologram = new HologramData();
+            holograms.push(hologram);
+            hologram.LoadAndAppend( hologramScene.scene, () => { hologramScene.scene.add(hologram.character); } );
+        });
+
        let settings = new DOM2AFrameSettings();
        settings.startingZindex = -30;
 
@@ -150,10 +170,28 @@ Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac 
        //settings.elementIterationStrategy = settings.elementIterationStrategies.FLAT;
        //settings.clippingEnabled = false;
 
-    setTimeout( () => {
-            const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container"), settings );
-            DOM2AFrame1.Init(true);
-    }, 5); // note: the timeout is NOT needed, just for testing if it would still work with it on (in some cases, this is not trivial apparently...\)
+
+        setTimeout( () => {
+                const container = document.getElementById("container");
+                const DOM2AFrame1 = new DOM2AFrame( container, settings );
+                container.addEventListener("aframe-scene-loaded", (evt) => { 
+                    let hologram = new HologramData();
+                    holograms.push(hologram);
+                    hologram.LoadAndAppend(evt.detail.object3D, (hologram) => {
+
+                        let mediaContainer = document.getElementById("mediaContentContainer").d2aelement.aelement.object3D;
+                        //threeScene.add(character);
+                        mediaContainer.add(hologram.character);
+                        hologram.character.position.set(0, 0, 1);
+                        hologram.character.rotation.set((30 * Math.PI) / 180, 0, 0); // TODO maybe change this rotation when we decide on our final scene layout? 
+                        hologram.character.scale.set(6, 6, 6);
+                        //hologram.character.position.set( mediaContainer.position );
+                    });
+
+
+                });
+                DOM2AFrame1.Init(true);
+        }, 5); // note: the timeout is NOT needed, just for testing if it would still work with it on (in some cases, this is not trivial apparently...\)
 
     </script> 
 

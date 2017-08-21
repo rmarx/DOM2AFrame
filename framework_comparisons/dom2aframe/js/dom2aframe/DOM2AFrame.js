@@ -392,6 +392,12 @@ class DOM2AFrame{
             this.AFrame.scene.renderer.localClippingEnabled = true;
         }
 
+        // TODO: change to a-frame light! 
+        let light = new THREE.AmbientLight(0xffffff, 0.15);
+        this.AFrame.scene.object3D.add(light);
+
+        this.DOM.container.dispatchEvent( new CustomEvent('aframe-scene-loaded', { detail: this.AFrame.scene }) );
+
         this._TransformFullDOM();
 
     } // _Init()
