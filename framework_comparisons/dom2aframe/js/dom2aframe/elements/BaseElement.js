@@ -503,7 +503,7 @@ class Element{
     }
 
     _RotateNormal(normal){
-        return normal;
+        //return normal;
         let originalNormal = normal.clone();
 
         let elementContainer = this.DOM2AFrame.AFrame.container.object3D;
@@ -599,23 +599,47 @@ class Element{
         
         // TODO: actually change coPlanarPoint's of the planes depending on our position! 
 
+        // TODO: we're being naive here with our calculations with + and - width/height /2
+        // this only works in axis-aligned, but not when rotated
+        // in that case, we need to move our "down" vector along our axis to get the proper position of course, not just y - height/2
+        // how to do this? that's a story for another day kids! 
 
-        let bottomPoint = new THREE.Vector3( this.position.x, this.position.y - (this.position.height/2), this.position.z ); 
-        let topPoint    = new THREE.Vector3( this.position.x, this.position.y + (this.position.height/2), this.position.z ); 
-        let leftPoint   = new THREE.Vector3( this.position.x - (this.position.width/2), this.position.y, this.position.z ); 
-        let rightPoint  = new THREE.Vector3( this.position.x + (this.position.width/2), this.position.y, this.position.z ); 
+        // both this.aelement.object3D.position and this.position are the LOCAL positions! and are assumed to be the same at all times
+        let threePosition = this.aelement.object3D.position;
+        // do this in local space so we can just use the accustomed unit vectors to figure out up, down, left and right (y and x axes)
+        let bottomLocal = threePosition.clone().add( (new THREE.Vector3(0, -1, 0)).multiplyScalar(this.position.height/2) );
+        let topLocal    = threePosition.clone().add( (new THREE.Vector3(0,  1, 0)).multiplyScalar(this.position.height/2) );
+        let leftLocal   = threePosition.clone().add( (new THREE.Vector3(-1, 0, 0)).multiplyScalar(this.position.width/2 ) );
+        let rightLocal  = threePosition.clone().add( (new THREE.Vector3( 1, 0, 0)).multiplyScalar(this.position.width/2 ) );
+
+        // let bottomPoint = this.DOM2AFrame.AFrame.container.object3D.localToWorld( bottomTranslationPoint.clone() );//this.aelement.object3D.localToWorld( bottomTranslationPoint.clone() );//new THREE.Vector3( this.position.x, this.position.y - (this.position.height/2), this.position.z ); 
+        // let topPoint    = new THREE.Vector3( this.position.x, this.position.y + (this.position.height/2), this.position.z ); 
+        // let leftPoint   = new THREE.Vector3( this.position.x - (this.position.width/2), this.position.y, this.position.z ); 
+        // let rightPoint  = new THREE.Vector3( this.position.x + (this.position.width/2), this.position.y, this.position.z ); 
+
+        // TODO: use the actual object3D's parent instead of the top-level container directly (only works because now we add everything as a direct child of the elementContainer!)
+        let bottomGlobal    = this.DOM2AFrame.AFrame.container.object3D.localToWorld( bottomLocal.clone()   );
+        let topGlobal       = this.DOM2AFrame.AFrame.container.object3D.localToWorld( topLocal.clone()      );
+        let leftGlobal      = this.DOM2AFrame.AFrame.container.object3D.localToWorld( leftLocal.clone()     );
+        let rightGlobal     = this.DOM2AFrame.AFrame.container.object3D.localToWorld( rightLocal.clone()    );
+        
 
         // plane positions are in world position, and ours are relative to the AFrame top-level container, so we need to manually offset
         // TODO: make this more robust? allow any number of parents or get our world positions from the THREE.js object with proper world matrix? 
-        bottomPoint = bottomPoint.add(  this.DOM2AFrame.AFrame.container.object3D.position );
-        topPoint    = topPoint.add(     this.DOM2AFrame.AFrame.container.object3D.position );
-        leftPoint   = leftPoint.add(    this.DOM2AFrame.AFrame.container.object3D.position );
-        rightPoint  = rightPoint.add(   this.DOM2AFrame.AFrame.container.object3D.position );
+        //bottomPoint = bottomPoint.add(  this.DOM2AFrame.AFrame.container.object3D.position );
+        //topPoint    = topPoint.add(     this.DOM2AFrame.AFrame.container.object3D.position );
+        //leftPoint   = leftPoint.add(    this.DOM2AFrame.AFrame.container.object3D.position );
+        //rightPoint  = rightPoint.add(   this.DOM2AFrame.AFrame.container.object3D.position );
+
+        //let originalLocalBottomPoint = (new THREE.Vector3( this.position.x, this.position.y - (this.position.height/2), this.position.z ));
+        //let originalBottomPoint = originalLocalBottomPoint.clone().add(  this.DOM2AFrame.AFrame.container.object3D.position );
+
+        //console.error("Clipping setup points", threePosition, bottomTranslationPoint, originalLocalBottomPoint, bottomPoint, originalBottomPoint, this.aelement.object3D.matrixWorld );
         
-        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(   this._RotateNormal(new THREE.Vector3( 0, 1, 0 )), bottomPoint   ).normalize();
-        this.clippingContext.top.setFromNormalAndCoplanarPoint(      this._RotateNormal(new THREE.Vector3( 0, -1, 0 )), topPoint     ).normalize();
-        this.clippingContext.left.setFromNormalAndCoplanarPoint(     this._RotateNormal(new THREE.Vector3( 1, 0, 0 )), leftPoint     ).normalize();
-        this.clippingContext.right.setFromNormalAndCoplanarPoint(    this._RotateNormal(new THREE.Vector3( -1, 0, 0 )), rightPoint   ).normalize();
+        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(   this._RotateNormal(new THREE.Vector3( 0, 1, 0 )), bottomGlobal   ).normalize();
+        this.clippingContext.top.setFromNormalAndCoplanarPoint(      this._RotateNormal(new THREE.Vector3( 0, -1, 0 )), topGlobal     ).normalize();
+        this.clippingContext.left.setFromNormalAndCoplanarPoint(     this._RotateNormal(new THREE.Vector3( 1, 0, 0 )), leftGlobal     ).normalize();
+        this.clippingContext.right.setFromNormalAndCoplanarPoint(    this._RotateNormal(new THREE.Vector3( -1, 0, 0 )), rightGlobal   ).normalize();
 
         // DEBUG visualizations of the clipping planes
         if( this.DOM2AFrame.settings.debugClipping ){

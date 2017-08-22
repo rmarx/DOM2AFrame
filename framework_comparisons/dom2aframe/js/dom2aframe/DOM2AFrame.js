@@ -253,7 +253,7 @@ class DOM2AFrame{
         this.AFrame.container = document.createElement("a-entity");
         this.AFrame.container.setAttribute("id", "aElementContainer");
         this.AFrame.container.setAttribute("position", "0 0 " + this.settings.startingZindex );
-        //this.AFrame.container.setAttribute("rotation", "45 0 0" );
+        //this.AFrame.container.setAttribute("rotation", "-45 0 0" ); // FIXME: REMOVE!
         this.AFrame.scene.appendChild(this.AFrame.container);
 
         //Calc the ammount of pixels in 1 meter
