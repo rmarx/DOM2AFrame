@@ -179,7 +179,7 @@ class TextElement extends Element{
 
 		let widthInPixels = this.position.width / this.position.DOM2AFrameScalingFactor;
 		let wrapPixels = widthInPixels * fontScalingFactor;
-		wrapPixels *= 1.05; // for some reason there is still a slight discrepancy with our calculations. This is needed to get at least single-line text to not wrap at the end... MAGIC NUMBER!
+		wrapPixels *= 1.075; // for some reason there is still a slight discrepancy with our calculations. This is needed to get at least single-line text to not wrap at the end... MAGIC NUMBER!
 		
 		this.atext.setAttribute("wrap-pixels", wrapPixels);
 		this.atext.setAttribute( "width", this.position.width);

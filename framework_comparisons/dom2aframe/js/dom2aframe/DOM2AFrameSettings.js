@@ -14,6 +14,7 @@ class DOM2AFrameSettings {
         this.elementIterationStrategy = this.elementIterationStrategies.FLAT;
 
         this.clippingEnabled = true;
+        this.debugClipping = true; 
 
         this.ignoreElementTags      = new Set(["BR", "SOURCE"]);
         this.containerElementTags   = new Set(["DIV", "SECTION", "BODY", "TABLE", "TR", "VIDEO", "CANVAS"]);

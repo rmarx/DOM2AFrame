@@ -82,6 +82,22 @@ class Position{
 		return {x: this.x, y: this.y, z: this.z};
 	}
 
+    get left(){
+        return {x: this.x - this.width / 2, y: this.y, z: this.z};
+    }
+
+    get right(){
+        return {x: this.x + this.width / 2, y: this.y, z: this.z};
+    }
+
+    get top(){
+        return {x: this.x, y: this.y + this.height / 2, z: this.z};
+    }
+
+    get bottom(){
+        return {x: this.x, y: this.y - this.height / 2, z: this.z};
+    }
+
 	EqualsDOMPosition(DOMPosition){
         return 	this.DOMPosition.top 	== DOMPosition.top && 
 				this.DOMPosition.bottom == DOMPosition.bottom && 
@@ -486,6 +502,18 @@ class Element{
         return id;
     }
 
+    _RotateNormal(normal){
+        return normal;
+        let originalNormal = normal.clone();
+
+        let elementContainer = this.DOM2AFrame.AFrame.container.object3D;
+        let normalMatrix = new THREE.Matrix3().getNormalMatrix( elementContainer.matrixWorld );
+		let output = normal.clone().applyMatrix3( normalMatrix ).normalize();
+
+        console.log("ROTATE NORMAL ", originalNormal, output, normalMatrix);
+
+        return output;
+    }
 
     _GetClippingContext(){
         let output = undefined;
@@ -504,10 +532,10 @@ class Element{
                 let clippingContext = {};
                 clippingContext.authority = this;
 
-                clippingContext.bottom = new THREE.Plane(new THREE.Vector3(0,1,0),  0); // normal pointing UP
-                clippingContext.top    = new THREE.Plane(new THREE.Vector3(0,-1,0), 0); // normal pointing DOWN
-                clippingContext.left   = new THREE.Plane(new THREE.Vector3(1,0,0),  0); // normal pointing RIGHT
-                clippingContext.right  = new THREE.Plane(new THREE.Vector3(-1,0,0), 0); // normal pointing LEFT
+                clippingContext.bottom = new THREE.Plane( this._RotateNormal(new THREE.Vector3(0,1,0)),  0); // normal pointing UP
+                clippingContext.top    = new THREE.Plane( this._RotateNormal(new THREE.Vector3(0,-1,0)), 0); // normal pointing DOWN
+                clippingContext.left   = new THREE.Plane( this._RotateNormal(new THREE.Vector3(1,0,0)),  0); // normal pointing RIGHT
+                clippingContext.right  = new THREE.Plane( this._RotateNormal(new THREE.Vector3(-1,0,0)), 0); // normal pointing LEFT
 
                 clippingContext.planes = [clippingContext.bottom, clippingContext.top, clippingContext.left, clippingContext.right];
 
@@ -584,11 +612,46 @@ class Element{
         leftPoint   = leftPoint.add(    this.DOM2AFrame.AFrame.container.object3D.position );
         rightPoint  = rightPoint.add(   this.DOM2AFrame.AFrame.container.object3D.position );
         
-        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(  new THREE.Vector3( 0, 1, 0 ), bottomPoint   ).normalize();
-        this.clippingContext.top.setFromNormalAndCoplanarPoint(     new THREE.Vector3( 0, -1, 0 ), topPoint     ).normalize();
-        this.clippingContext.left.setFromNormalAndCoplanarPoint(    new THREE.Vector3( 1, 0, 0 ), leftPoint     ).normalize();
-        this.clippingContext.right.setFromNormalAndCoplanarPoint(   new THREE.Vector3( -1, 0, 0 ), rightPoint   ).normalize();
+        this.clippingContext.bottom.setFromNormalAndCoplanarPoint(   this._RotateNormal(new THREE.Vector3( 0, 1, 0 )), bottomPoint   ).normalize();
+        this.clippingContext.top.setFromNormalAndCoplanarPoint(      this._RotateNormal(new THREE.Vector3( 0, -1, 0 )), topPoint     ).normalize();
+        this.clippingContext.left.setFromNormalAndCoplanarPoint(     this._RotateNormal(new THREE.Vector3( 1, 0, 0 )), leftPoint     ).normalize();
+        this.clippingContext.right.setFromNormalAndCoplanarPoint(    this._RotateNormal(new THREE.Vector3( -1, 0, 0 )), rightPoint   ).normalize();
 
+        // DEBUG visualizations of the clipping planes
+        if( this.DOM2AFrame.settings.debugClipping ){
+            if( !this.clippingPlaneHelpers ){
+                this.clippingPlaneHelpers = new Array();
+
+                for( let plane of this.clippingContext.planes ){
+
+                    let planeMaterial = new THREE.MeshLambertMaterial({color: 0xffff00, side: THREE.DoubleSide});
+                    let geometry = new THREE.PlaneGeometry(10, 10);//new THREE.BoxGeometry(10, 10, 1);//new THREE.BoxGeometry(10, 1, 10);//new THREE.PlaneGeometry(10, 10);
+                    let mesh = new THREE.Mesh(geometry, planeMaterial);
+
+                    mesh.DEBUG_PLANE = plane;
+                    this.clippingPlaneHelpers.push( mesh );
+
+                    let axisHelper = new THREE.AxisHelper(5);
+                    mesh.add( axisHelper );
+                }
+
+                for( let helper of this.clippingPlaneHelpers )
+                    this.DOM2AFrame.AFrame.scene.object3D.add( helper );
+
+                console.warn("Added plane helpers!", this.clippingPlaneHelpers);
+            }
+
+            for( let mesh of this.clippingPlaneHelpers ){
+                
+                let worldPos = this.aelement.object3D.getWorldPosition(); // center of the object
+                let myPoint = mesh.DEBUG_PLANE.projectPoint( worldPos ); // the clipping planes are already aligned to our world-pos sides, to we can just project the center onto them to get the edge points we need
+                mesh.position.set( myPoint.x, myPoint.y, myPoint.z );
+
+                // the clipping plane normals are "inverted" to what we want, so multiply by -1 to get the correct setup
+                var focalPoint = myPoint.clone().add( mesh.DEBUG_PLANE.normal.clone().multiplyScalar(-1) );
+                mesh.lookAt(focalPoint);
+            }
+        }
 
         this.aelement.object3D.children[0].material.needsUpdate = true; // TODO: shouldn't be needed! remove!
         
