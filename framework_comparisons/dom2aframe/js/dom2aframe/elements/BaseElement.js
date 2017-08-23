@@ -164,7 +164,7 @@ class Element{
         let self = this;
         this.domelement.addEventListener("input", (evt) => { 
             if( evt.target == this.domelement )
-                evt.stopPropagation();
+               evt.stopPropagation();
 
             console.warn("input changed!"); 
             self.HandleMutation(); 
@@ -477,10 +477,6 @@ class Element{
 		}
 		
 		this.borderObject.material.needsUpdate = true;
-        //console.error("Border updated", this.borderObject.material, this.domelement);
-        
-        if( this.domelement.getAttribute("id") == "item1")
-            console.error("BORDE POSITIONS", this.borderObject.geometry.attributes.position);
 	}
 
     // ex. GetAsset("http://google.com/logo.png", "img")
@@ -503,14 +499,11 @@ class Element{
     }
 
     _RotateNormal(normal){
-        //return normal;
         let originalNormal = normal.clone();
 
         let elementContainer = this.DOM2AFrame.AFrame.container.object3D;
         let normalMatrix = new THREE.Matrix3().getNormalMatrix( elementContainer.matrixWorld );
 		let output = normal.clone().applyMatrix3( normalMatrix ).normalize();
-
-        console.log("ROTATE NORMAL ", originalNormal, output, normalMatrix);
 
         return output;
     }
@@ -581,9 +574,8 @@ class Element{
             //material.clippingPlanes = [clippingContext.right, clippingContext.left, clippingContext.top];//[clippingContext.bottom];
             //material.clippingPlanes = [clippingContext.bottom, clippingContext.top];//, clippingContext.top, clippingContext.right];
 
-            console.error("Added clipping to ", this.constructor.name, this.domelement, this.clippingContext.authority.domelement );
-
             this.UpdateClipping(); // position the planes correctly for initialization
+            setTimeout(() => { this.UpdateClipping(); }, 200); // for some reason, object3D hasn't been positioned correctly here and there is no a-frame event that allows us to listen for that... so HACK to correctly set clipping here
             material.needsUpdate = true;
         }
     }
@@ -595,14 +587,8 @@ class Element{
         if( !this.clippingContext || this.clippingContext.authority != this )
             return;
 
-        // TODO: we currently don't support overflow settings changing at runtime! 
-        
-        // TODO: actually change coPlanarPoint's of the planes depending on our position! 
+        // TODO: we currently don't support overflow settings changing at runtime! (i.e. what if this overflow is suddenly no longer set to hidden?)
 
-        // TODO: we're being naive here with our calculations with + and - width/height /2
-        // this only works in axis-aligned, but not when rotated
-        // in that case, we need to move our "down" vector along our axis to get the proper position of course, not just y - height/2
-        // how to do this? that's a story for another day kids! 
 
         // both this.aelement.object3D.position and this.position are the LOCAL positions! and are assumed to be the same at all times
         let threePosition = this.aelement.object3D.position;
@@ -667,6 +653,8 @@ class Element{
 
             for( let mesh of this.clippingPlaneHelpers ){
                 
+                mesh.visible = true;
+
                 let worldPos = this.aelement.object3D.getWorldPosition(); // center of the object
                 let myPoint = mesh.DEBUG_PLANE.projectPoint( worldPos ); // the clipping planes are already aligned to our world-pos sides, to we can just project the center onto them to get the edge points we need
                 mesh.position.set( myPoint.x, myPoint.y, myPoint.z );
@@ -676,10 +664,18 @@ class Element{
                 mesh.lookAt(focalPoint);
             }
         }
+        else{
+            if( this.clippingPlaneHelpers ){
+                for( let mesh of this.clippingPlaneHelpers ){
+                    mesh.visible = false;
+                }
+            }
+        }
+
 
         this.aelement.object3D.children[0].material.needsUpdate = true; // TODO: shouldn't be needed! remove!
         
-        console.warn("Updating clipping : ", this.DOM2AFrame.AFrame.scene.renderer.localClippingEnabled, this.aelement.object3D.children[0].material.clippingPlanes, this.clippingContext.bottom, this.domelement);
+        //console.warn("Updating clipping : ", this.DOM2AFrame.AFrame.scene.renderer.localClippingEnabled, this.aelement.object3D.children[0].material.clippingPlanes, this.clippingContext.bottom, this.domelement);
 
 
         //     var dir = new THREE.Vector3(0,1,0);

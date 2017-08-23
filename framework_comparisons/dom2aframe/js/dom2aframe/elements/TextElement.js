@@ -318,7 +318,7 @@ class TextElement extends Element{
             material.clipping = true;
             material.clippingPlanes = clippingContext.planes;
 
-            console.error("Added clipping to TEXT ELEMENT ", this.domelement, this.clippingContext.authority.domelement );
+            //console.error("Added clipping to TEXT ELEMENT ", this.domelement, this.clippingContext.authority.domelement );
 
             this.UpdateClipping(); // position the planes correctly for initialization
             material.needsUpdate = true;

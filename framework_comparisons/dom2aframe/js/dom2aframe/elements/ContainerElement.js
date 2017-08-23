@@ -7,7 +7,7 @@ class ContainerElement extends Element{
 		//this.update(true);
 
 		
-		if( this.domelement.tagName == "INPUT" && this.domelement.getAttribute("type") == "checkbox")
+		if( this.domelement.tagName == "INPUT" && (this.domelement.getAttribute("type") == "checkbox" || this.domelement.getAttribute("type") == "radio" ))
 		{
 			this.customBorder = { color: {r:0,g:0,b:0}, width: 1 }; // TODO: make this more general so we can override all styles!
 		}
@@ -15,6 +15,15 @@ class ContainerElement extends Element{
 		if( registerEvents )
 			this.SetupEventHandlers();
 	}
+
+	Init(){
+        super.Init();
+
+		if( this.domelement.tagName == "VIDEO" )
+		{
+			this.SetupVideoTexture();
+		}
+    }
 
 	ElementSpecificUpdate(element_style){
 		//console.log("ElementSpecificUpdate CONTAINER ", this.domelement);
@@ -64,6 +73,18 @@ class ContainerElement extends Element{
 				if( aColor != domColor )
 					this.aelement.setAttribute('color', domColor);
 			}
+
+			// TODO: make this cleaner. Plugin-alike system? custom subclass? 
+			if( this.domelement.tagName == "INPUT" && (this.domelement.getAttribute("type") == "checkbox" || this.domelement.getAttribute("type") == "radio" ))
+			{
+				if( this.domelement.checked ){
+					this.aelement.setAttribute('color', "rgb(0,0,0)");
+					this.aelement.setAttribute("opacity", "1");
+				}
+				else{
+					this.aelement.setAttribute("opacity", "0");
+				}
+			}
 		}
 
 		if( isNaN(this.position.x) || isNaN(this.position.y) )
@@ -74,5 +95,17 @@ class ContainerElement extends Element{
 		this.UpdateBorders(element_style);
 	}
 
+	SetupVideoTexture(){
+		// https://threejs.org/docs/#api/textures/VideoTexture
+		// https://github.com/jeromeetienne/threex.videotexture
+
+		let texture = new THREE.VideoTexture( this.domelement );
+		texture.minFilter = THREE.LinearFilter;
+		texture.magFilter = THREE.LinearFilter;
+		texture.format = THREE.RGBFormat;
+
+		this.aelement.object3D.children[0].material = new THREE.MeshStandardMaterial( { color: 0xffffff, map: texture} ); // MeshLambertMaterial
+		//this.aelement.object3D.children[0].material.map = texture; 
+	}
 	
 }

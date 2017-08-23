@@ -26,6 +26,7 @@ class DOM2AFrame{
         this.elements = new Set();
 
         this.state = {};
+        this.state.debugging    = false; 
         this.state.updateAll    = true;
         this.state.requestedFPS = 60;
         this.state.dirty        = false; // if anything is dirty in the whole scene: means we should check everything for changes
@@ -38,6 +39,8 @@ class DOM2AFrame{
 
         this.animationLoops = 0;
         this.maxUpdateDuration = 0; // debugging
+
+        window.MainDOM2AFrame = this;
     }
 
 
@@ -148,7 +151,10 @@ class DOM2AFrame{
                 }
             }
 
-            if( hasTextNode ){
+            // TODO: make this more generic!
+            let isTextInput = (DOMElement.tagName == "INPUT" && DOMElement.getAttribute("type") == "text");
+
+            if( hasTextNode || isTextInput ){
                 new_a_element = new TextElement(this, DOMElement, layer);
             }
             else{
@@ -238,6 +244,7 @@ class DOM2AFrame{
     _Init(debug = false){
         console.trace("DOM2AFrame:_Init");
         let self = this;
+        this.state.debugging = debug;
 
         let vrcss = document.createElement('style'); 
         vrcss.innerHTML = "a-scene{width: 600px; height: 600px;}"; // .a-enter-vr{position: fixed;} 
@@ -396,6 +403,7 @@ class DOM2AFrame{
         let light = new THREE.AmbientLight(0xffffff, 0.15);
         this.AFrame.scene.object3D.add(light);
 
+        this.DOM.container["aframeSceneLoaded"] = true;
         this.DOM.container.dispatchEvent( new CustomEvent('aframe-scene-loaded', { detail: this.AFrame.scene }) );
 
         this._TransformFullDOM();
@@ -491,9 +499,12 @@ function IsDragEvent(element){
 }
 
 
-document.onkeydown = checkKey;
+document.addEventListener("keydown", checkKey);
 
 function checkKey(e) {
+
+    if( !window.MainDOM2AFrame.state.debugging )
+        return;
 
     e = e || window.event;
 
@@ -513,8 +524,8 @@ function checkKey(e) {
         var pos = camera_entity.getAttribute("position");
         camera_entity.setAttribute("position", pos.x+ " "+ (pos.y - 2) +" "+ pos.z);
         video_element.SetPosition(pos);
-    } else if (e.keyCode == '84') {
-        video_element.ToggleMode();
+   // } else if (e.keyCode == '84') {
+       // video_element.ToggleMode();
     } else if (e.keyCode == '80') { // P
     	var v_element_visibility = video_element.IsVisible();
         a_element_container.setAttribute("visible", v_element_visibility);
@@ -580,6 +591,19 @@ function checkKey(e) {
 
         let overflowContainer2 = document.getElementById("overflowContainer2");
         changeFunctions.animateWidthEl(overflowContainer2);
+    }
+    if (e.keyCode == '84') { // T (toggle) 
+    	
+        window.MainDOM2AFrame.settings.debugClipping = !window.MainDOM2AFrame.settings.debugClipping;
+
+        let elements = window.MainDOM2AFrame.elements;
+        
+        for (let element of elements)
+            element.UpdateCaches();
+
+        for (let element of elements)
+            element.Update(true, true);
+
     }
 
 }

@@ -77,7 +77,9 @@ class HologramData {
     this.activeActionName = "idle";
     this.loaded = false;
     this.character = undefined;
+
     this.mixer = undefined;
+    this.rotating = false;
 
     this.arrAnimations = [
       'idle',
@@ -110,6 +112,7 @@ class HologramData {
       });
 
       this.character = new THREE.SkinnedMesh(geometry, new THREE.MeshFaceMaterial(materials));
+      this.character.position.set(0, 0.5, 0);
 
       this.mixer = new THREE.AnimationMixer(this.character);
 
@@ -171,9 +174,9 @@ class HologramScene {
 
     this.scene = new THREE.Scene();
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setClearColor( 0xFF0000, 1); 
+    this.renderer.setClearColor( 0xFF0000, 0); 
     //this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.container = document.getElementById('hologramCanvas');
@@ -194,7 +197,7 @@ class HologramScene {
 
     
     window.addEventListener('resize', this.OnWindowResize.bind(this), false);
-    window.addEventListener('click', this.OnDoubleClick.bind(this), false);
+    //window.addEventListener('click', this.OnDoubleClick.bind(this), false);
     this.Animate();
 
   }
@@ -206,6 +209,7 @@ class HologramScene {
     //this.renderer.setSize(this.container.width, this.container.height);
   }
 
+/*
   OnDoubleClick() {
     var now = new Date().getTime();
     var timesince = now - this.mylatesttap;
@@ -226,6 +230,7 @@ class HologramScene {
 
     this.mylatesttap = new Date().getTime();
   }
+  */
 
 
 
@@ -242,6 +247,9 @@ class HologramScene {
     for( let hologram of this.holograms ){
       if( hologram.loaded )
         hologram.mixer.update(delta);
+
+        if( hologram.rotating )
+          hologram.character.rotateY((45 * Math.PI/180) * delta);
     }
 
     this.renderer.render(this.scene, this.camera);
