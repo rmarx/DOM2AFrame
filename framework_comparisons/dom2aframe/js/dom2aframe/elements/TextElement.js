@@ -168,6 +168,8 @@ class TextElement extends Element{
 		//let paddingTop = element_style.getPropertyValue("padding-top");
 		//xyz.y -= parseFloat(paddingTop) * this.position.DOM2AFrameScalingFactor;
 
+		xyz.z += this.DOM2AFrame.settings.layerStepSize; // move it slightly on top of the backgroundPlane
+
         this.atext.setAttribute("position", xyz );
 	}
 

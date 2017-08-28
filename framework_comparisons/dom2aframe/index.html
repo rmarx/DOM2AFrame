@@ -47,7 +47,7 @@
                 <div style="clear: both;"></div>
             </div>
             <div id="bottom">
-                <a href="http://google.com" target="_blank">google.com</a>
+                <a href="http://google.com" id="googleLink" target="_blank">google.com</a>
             </div>
             <!--<div id="overflowContainer1" style="overflow: hidden; width: 200px; height: 50px; border: 2px solid black;">
                 <p id="overflowp1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam elit erat, gravida eget posuere ut, aliquet ut tellus. Donec et luctus augue. </p>
@@ -214,12 +214,13 @@
        settings.startingZindex = -30;
 
        settings.elementIterationStrategy = settings.elementIterationStrategies.TREE;
+       settings.debugClipping = false;
 
        //settings.elementIterationStrategy = settings.elementIterationStrategies.FLAT;
        //settings.clippingEnabled = false;
 
        const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container"), settings );
-       DOM2AFrame1.Init(true);
+       DOM2AFrame1.Init(false);
 
     </script> 
 

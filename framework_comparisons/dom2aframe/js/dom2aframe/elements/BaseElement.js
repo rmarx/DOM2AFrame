@@ -175,13 +175,21 @@ class Element{
         this.mouseEventHandler._resync(); // perform the initial sync to pick-up mouse handlers that might have been registered before this element // TODO: maybe move this to MouseEventHandler ctor instead?
 
         /*
-        setTimeout( () => {
+        setTimeout( () => { 
             //console.error("Setting up click handler on", this.aelement);
             //this.aelement.addEventListener("raycaster-intersected", function(){ console.log("INTERSECTED!"); });
-            this.aelement.addEventListener('mouseenter', () => { console.log("mouse enter", this.aelement); });
-            this.aelement.addEventListener("click", () => { console.log("CLICKED!", this.aelement, this.aelement.domelement); alert("Element clicked!"); }); 
+
+            if( !this.DOM2AFrame.debugListeningToIntersections ){
+                this.DOM2AFrame.debugListeningToIntersections = true;
+                this.DOM2AFrame.AFrame.scene.camera.el.children[0].components["cursor"].el.addEventListener("raycaster-intersection", (evt) => { console.error("Raycast intersected", evt)});
+            }
+            this.aelement.addEventListener('mouseenter', () => { console.log("mouse enter", this.aelement.getAttribute("id"), this.domelement.tagName, this.domelement, this.DOM2AFrame.AFrame.scene.camera.el.children[0].components["raycaster"].intersectedEls, this.DOM2AFrame.AFrame.scene.camera.el.children[0].components["cursor"].intersectedEl,  this.aelement); });
+            this.aelement.addEventListener('mouseleave', () => { console.warn("mouse leave", this.aelement.getAttribute("id"), this.domelement.tagName, this.domelement, this.DOM2AFrame.AFrame.scene.camera.el.children[0].components["cursor"].intersectedEl,  this.aelement); });
+            
+            //this.aelement.addEventListener("click", () => { console.log("CLICKED!", this.aelement, this.aelement.domelement); alert("Element clicked!"); }); 
         }, 1000);
         */
+        
     }
 
     HandleEventListenerAdded(evt){
@@ -444,13 +452,44 @@ class Element{
 
         // TODO: make more efficient https://threejs.org/docs/#manual/introduction/How-to-update-things
 
+        if( this.borderObject ){
+            this.DOM2AFrame.AFrame.scene.object3D.remove( this.borderObject );
+            this.borderObject = undefined;
+        }
+
         let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
 
         // https://threejs.org/docs/#api/geometries/EdgesGeometry
+        // TODO: replace with this or something similar to support wider lines: https://github.com/spite/THREE.MeshLine/blob/master/src/THREE.MeshLine.js
         var edges = new THREE.EdgesGeometry( threePlane.geometry );
         var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
-        this.aelement.setObject3D('border', line); // will auto-remove existing border object if any
+        // var line = new THREE.LineSegments( edges, new THREE.MeshLineMaterial({
+        //     color: new THREE.Color(0x00000000),
+        //     //near: camera.near,
+        //     //far: camera.far,
+        //     lineWidth: 4.,
+        //     sizeAttenuation: false,
+        //     //resolution: new THREE.Vector2(width, height)
+        // }));
+        //this.borderEntity.setAttribute("position", this.position.xyz);
+        //line.position.setZ( line.position.z + 0.001 );
         this.borderObject = line;
+        this.DOM2AFrame.AFrame.scene.object3D.add( this.borderObject );
+        
+        requestAnimationFrame( () => {
+            // at this point, a-frame's position is set, but not yet propagated to the three.js layer...
+            // so we need to postpone setting our border positions with 1 frame to allow three.js to catch up
+            // TODO: make this nicer (i.e. if object3D is a child of our main element in the world, local coords are enough)
+            // NOTE: we changed this because using this.aelement.setObject3D('border', line) will enable raycast intersections! on our borders, which often gave very wrong and jittery results! 
+            // this is why we add them as a separate threejs.object3D for now, because we don't know if the intersections wouldn't happen if we add it as a child to the aelement.object3D group
+            // something else that we could try to get rid of this raf: make an invisible <a-plane> and give that the border... 
+            let worldPos = this.aelement.object3D.getWorldPosition();
+            this.borderObject.position.set( worldPos.x, worldPos.y, worldPos.z + this.DOM2AFrame.settings.layerStepSize );
+        });
+        //this.borderEntity.setObject3D('border', line); // will auto-remove existing border object if any
+
+
+
 
         if( this.clippingContext ){
             line.material.clipping = true;

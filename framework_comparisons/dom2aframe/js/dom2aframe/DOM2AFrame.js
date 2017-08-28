@@ -156,6 +156,9 @@ class DOM2AFrame{
 
             if( hasTextNode || isTextInput ){
                 new_a_element = new TextElement(this, DOMElement, layer);
+                
+                // textElement is composed out of 2 parts, so increase the layerStep by one more TODO: make this more generic and not hardcoded for 1 more (1 extra step for each child "part" maybe?)
+                this.state.currentLayerDepth += this.settings.layerStepSize; 
             }
             else{
                 console.warn("DOM2AFrame:AddDOMElement : normal text element replaced by container because it didn't have text nodes!", DOMElement);
@@ -331,10 +334,12 @@ class DOM2AFrame{
         //cursor.setAttribute("rayOrigin", "mouse"); // coming in 0.6.1
         cursor.setAttribute("fuse-timeout", 500);
         cursor.setAttribute("color", "green");
-        cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+"; objects: ." + this.settings.interactableObjectsTag + ";");
+        cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+"; objects: ." + this.settings.interactableObjectsTag + "; showLine: true;");
+        cursor.setAttribute("line", "color: orange;" );
         //cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+";");
-        this.AFrame.camera.appendChild(cursor);
+        this.AFrame.camera.appendChild(cursor); 
         
+        this.AFrame.camera.components["wasd-controls"].data.fly =  true;
 
 
 
