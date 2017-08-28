@@ -52,7 +52,8 @@ class ContainerElement extends Element{
 			// backgroundImage is of the form   url("PATH"), so we need to get rid of the url("") part
 			backgroundImage = backgroundImage.substring(backgroundImage.lastIndexOf('(\"')+2,backgroundImage.lastIndexOf('\")'));
 			
-			this.aelement.setAttribute('material','src: #' + this.GetAsset(backgroundImage, "img"));
+			// alphaTest 0.5 enables transparancy in PNG images!
+			this.aelement.setAttribute('material','alphaTest: 0.5; src: #' + this.GetAsset(backgroundImage, "img"));
 		}
 		else{
 			// otherwhise they will show up as black + hiding them helps performance tremendously since they aren't drawn!!! (is the case for most containers -> just make sure to have 1 top-level container that is always drawn)

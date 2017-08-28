@@ -137,6 +137,8 @@ class Element{
             return;
         }
 
+        this.aelement.setAttribute("class", this.DOM2AFrame.settings.interactableObjectsTag);
+
         this.mouseEventHandler = new MouseEventHandler(this);
 
         //Listenes for direct css changes
@@ -171,6 +173,15 @@ class Element{
         });
 
         this.mouseEventHandler._resync(); // perform the initial sync to pick-up mouse handlers that might have been registered before this element // TODO: maybe move this to MouseEventHandler ctor instead?
+
+        /*
+        setTimeout( () => {
+            //console.error("Setting up click handler on", this.aelement);
+            //this.aelement.addEventListener("raycaster-intersected", function(){ console.log("INTERSECTED!"); });
+            this.aelement.addEventListener('mouseenter', () => { console.log("mouse enter", this.aelement); });
+            this.aelement.addEventListener("click", () => { console.log("CLICKED!", this.aelement, this.aelement.domelement); alert("Element clicked!"); }); 
+        }, 1000);
+        */
     }
 
     HandleEventListenerAdded(evt){

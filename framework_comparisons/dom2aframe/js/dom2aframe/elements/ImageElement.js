@@ -12,9 +12,17 @@ class ImageElement extends Element{
 		*/
 		let asset_id = this.GetAsset( this.domelement.getAttribute("src"), "img");
 
+		/*
 		this.aelement = document.createElement("a-image");
         this.aelement.setAttribute("id", "IMAGE_" + asset_id);
 		this.aelement.setAttribute("src","#"+asset_id);
+		*/
+
+		this.aelement = document.createElement("a-plane");
+        this.aelement.setAttribute("id", "IMAGE_" + asset_id);
+		// alphaTest 0.5 enables transparancy in PNG images!
+		this.aelement.setAttribute('material','alphaTest: 0.5; src: #' + asset_id);
+
 		
 
         //console.warn("Created Image asset with source", asset_id, this.aelement, this.DOM2AFrame.AFrame.assets);

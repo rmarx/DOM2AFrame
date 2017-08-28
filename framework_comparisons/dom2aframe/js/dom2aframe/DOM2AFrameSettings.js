@@ -8,6 +8,8 @@ class DOM2AFrameSettings {
         this.startingLayerDepth = -0.2; // offset from config.startingZindex where the layers will actually be placed
         this.layerStepSize = 0.001; // z-space between the layers 
 
+        this.interactableObjectsTag = "d2ainteractable";
+
         // FLAT: getElementsByTagName("*") and just process them independently (no parent-child relationchips)
         // TREE: start at the root and iterate over child nodes recursively (keep track of parent-child relationchips. originally added for overflow support with clipping)
         this.elementIterationStrategies = { FLAT : 'FLAT', TREE : 'TREE' };

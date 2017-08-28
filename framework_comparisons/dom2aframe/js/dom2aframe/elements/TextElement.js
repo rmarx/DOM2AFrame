@@ -29,6 +29,9 @@ class TextElement extends Element{
 		this.backgroundPlane = new ContainerElement(DOM2AFrame, domelement, depth - (this.DOM2AFrame.settings.layerStepSize/2), false); // background shouldn't register events, only our main a-text element (otherwise the same DOMElement would get double the events)
 		this.atext = document.createElement("a-text");// new TextElement(domelement, depth);
 
+		//this.atext.setAttribute("class", this.DOM2AFrame.settings.interactableObjectsTag); // shouldn't do this, since atext doesn't have a coupled .d2aelement and, consequently, no domelement to pass events on to
+		this.backgroundPlane.AElement.setAttribute("class", this.DOM2AFrame.settings.interactableObjectsTag); // text catches most events, but apparently pointer-based stuff is mesh-bound and falls through gaps in the text? strange stuff here... beware! 
+
 		//Add container and text to this entity
 		this.aelement.appendChild(this.backgroundPlane.AElement );
 		this.aelement.appendChild(this.atext );

@@ -175,6 +175,7 @@ class DOM2AFrame{
         if( domID && domID != null )
             new_a_element.AElement.setAttribute("id", "a_" + domID );
         
+        //new_a_element.aelement.setAttribute("class", this.settings.interactableObjectsTag); // is done in BaseElement itself
         this.elements.add(new_a_element);
 
         // appendChild is ASYNC
@@ -184,6 +185,10 @@ class DOM2AFrame{
             new_a_element.Init();
             new_a_element.UpdateCaches();
             new_a_element.Update(true);
+
+            // for some reason, it doesn't refresh properly automatically. Needed to enable input on all tagged elements
+            // TODO: FIXME: if that happens here, it's going to happen outside of this function as well... make this more generic! 
+            new_a_element.DOM2AFrame.AFrame.scene.camera.el.children[0].components["raycaster"].refreshObjects(); 
         };
 
         // "loaded" event was too soon: setAttribute wasn't always used then. play seems to do the trick
@@ -320,12 +325,16 @@ class DOM2AFrame{
         
 
         //Cursor
+        
         let cursor = document.createElement("a-cursor");
         //cursor.setAttribute("fuse",true);
+        //cursor.setAttribute("rayOrigin", "mouse"); // coming in 0.6.1
         cursor.setAttribute("fuse-timeout", 500);
         cursor.setAttribute("color", "green");
-        cursor.setAttribute("raycaster", "far: "+cameraFar+";");//"objects: .clickable; far: "+cameraFar+";");
+        cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+"; objects: ." + this.settings.interactableObjectsTag + ";");
+        //cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+";");
         this.AFrame.camera.appendChild(cursor);
+        
 
 
 
