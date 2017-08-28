@@ -120,6 +120,7 @@ class Element{
 
         this.cache = new PropertyCache();
         this.cache.Register("color");
+        this.cache.Register("background-color");
         this.cache.Register("opacity");
         this.cache.Register("visibility");
         this.cache.Register("display");

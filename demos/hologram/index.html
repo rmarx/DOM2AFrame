@@ -43,6 +43,20 @@
                     http://unboring.net/workflows/animation.html 
                 -->
                 <div id="hologramCanvas"></div>
+
+                <div class="animationButtonBox" style="left: 3%;">
+                    <p style="margin: 1px;">Animation:</p>
+                    <img src="files/img/unchecked.png" onclick="alert('ROBIN');" /> <span>Idle </span> <br />
+                    <img src="files/img/checked.png" /> <span>Walk </span> <br />
+                    <img src="files/img/unchecked.png" /> <span>Run </span> <br />
+                    <img src="files/img/unchecked.png" /> <span>Hello </span> <br />
+                </div>
+                <div class="animationButtonBox" style="right: 3%; text-align: right;">
+                        <p style="margin: 1px;">Hologram:</p>
+                        <span>Visible </span> <img src="files/img/checked.png" onclick="alert('ROBIN');" /><br />
+                        <span>Rotate </span> <img src="files/img/unchecked.png" /><br />
+                </div>
+                
                 <video id="video" controls>
                     <source src="../../framework_comparisons/base/video.mp4" type="video/mp4">
                 </video>
@@ -72,6 +86,7 @@
                 </div>
             </div>
         </div>
+        <div id="separationLine" style="float: left; width: 5px; height: 100%; background-color: #7b8392;"></div>
         <div id="rightColumn">
             <!-- 
                Accordion based on http://css3.bradshawenterprises.com/accordions/
@@ -79,11 +94,13 @@
 
             <div id="accordion">
                 <section id="item1">
-                    <p class="pointer">></p><h1>A long paragraph</h1>
+                    <p class="pointer">></p><h1>A LONG TIME AGO</h1>  
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur consectetur nunc et eros fermentum, non suscipit arcu fermentum. Fusce id lorem dolor. Aenean molestie neque vitae purus pretium, et sagittis urna auctor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse fringilla justo faucibus rhoncus tincidunt. Integer porttitor et nibh sit amet aliquam. Nam non lectus egestas, blandit dui et, accumsan leo. Maecenas sodales erat sit amet erat pretium, vulputate ultricies tortor rhoncus. Vivamus ultrices nisi id luctus aliquet. Pellentesque faucibus molestie leo, ut venenatis nibh. Nunc eleifend pulvinar tempus.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur consectetur nunc et eros fermentum, non suscipit arcu fermentum. Fusce id lorem dolor. Aenean molestie neque vitae purus pretium, et sagittis urna auctor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse fringilla justo faucibus rhoncus tincidunt. Integer porttitor et nibh sit amet aliquam. Nam non lectus egestas, blandit dui et, accumsan leo. Maecenas sodales erat sit amet erat pretium, vulputate ultricies tortor rhoncus.
                     </p>
-                    <img src="../../framework_comparisons/base/webvr-logo-square.png" style="border: 1px solid black; width: 100px;" />
+                    <p style="text-align: center;">
+                        <img src="../../framework_comparisons/base/webvr-logo-square.png" style="border: 1px solid black; width: 100px;" />
+                    </p>
                     <p>
 Praesent ipsum velit, interdum id nulla eget, aliquet dapibus nulla. Phasellus varius in elit ut consectetur. Morbi tincidunt tristique ex non euismod. Aliquam id ante vel enim interdum condimentum sed fermentum ipsum. Morbi vehicula sem luctus, ullamcorper urna sed, finibus dui. Etiam in efficitur arcu, at faucibus ex. Maecenas eu orci posuere, fringilla leo eget, consectetur elit. Proin sed turpis sed ante aliquam pretium. Vivamus sodales lorem vitae placerat gravida. Suspendisse ornare mollis ligula ac lacinia. Sed feugiat risus nulla, id bibendum quam accumsan in.
                     </p>
@@ -92,7 +109,7 @@ Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac 
                     </p>
                 </section>
                 <section id="item2" class="ac_hidden">
-                    <p class="pointer">></p><h1><a href="#">A medium paragraph</a></h1>
+                    <p class="pointer">></p><h1><a href="#">IN A GALAXY FAR FAR AWAY</a></h1>
                     <p>
 Praesent ipsum velit, interdum id nulla eget, aliquet dapibus nulla. Phasellus varius in elit ut consectetur. Morbi tincidunt tristique ex non euismod. Aliquam id ante vel enim interdum condimentum sed fermentum ipsum. Morbi vehicula sem luctus, ullamcorper urna sed, finibus dui. Etiam in efficitur arcu, at faucibus ex. Maecenas eu orci posuere, fringilla leo eget, consectetur elit. Proin sed turpis sed ante aliquam pretium. Vivamus sodales lorem vitae placerat gravida. Suspendisse ornare mollis ligula ac lacinia. Sed feugiat risus nulla, id bibendum quam accumsan in.
                     </p>
@@ -101,11 +118,15 @@ Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac 
                     </p>
                 </section>
                 <section id="item3" class="ac_hidden">
-                    <p class="pointer">></p><h1><a href="#">Two short paragraphs</a></h1>
-                    <div id="cliOutputContainer">
-                        <p id="item3_p1">Pellentesque habitant... </p>
-                        <p id="item3_p2">Pellentesque habitant... </p>
+                    <p class="pointer">></p><h1><a href="#">EPISODE IX: THE HOLOGRAM</a></h1>
+                    <div style="width: 90%; margin-left: 5%; height: 88%;">
+                        <div id="cliOutputHeading"><p>Console commands:</p></div>
+                        <div id="cliOutputContainer">
+                            <p id="item3_p1">$ cd ../</p>
+                            <p id="item3_p2">$ sudo ./hologram.sh</p>
+                        </div>
                     </div>
+                    <div style="height:1%; background-color: #2aa1d3; width: 100%;"></div>
                 </section>
             </div>
         </div>
@@ -113,7 +134,7 @@ Donec euismod tincidunt tincidunt. Donec ut nisi sit amet arcu varius mollis ac 
     </div>
     
 
-    <div id="canvasContainer" style="float: left; border: 3px solid black; min-width: 800px; min-height: 1000px; padding: 3px;">
+    <div id="canvasContainer" style="float: left; border: 3px solid white; min-width: 800px; min-height: 1000px; padding: 3px;">
         <!--<canvas width="600" height="800"></canvas>-->
         <a-scene id="aScene" embedded stats="true" style="width: 800px; height: 1000px">
             <a-box color="red" position="0 -15 -19" rotation="0 45 45" scale="1 1 1"></a-box>

@@ -12,7 +12,7 @@
   /*line-height:1.2;*/
   height: 44px;
   font-size:20px;
-  background-color:blue;
+  background-color:#ee4e10;
   color: #FFF;
   margin:0;
   padding: 10px 10px 10px 30px; 
@@ -30,11 +30,10 @@
 }
 #accordion p {
   padding:0 10px;
-  color:black;
   opacity: 1;
 }
 #accordion section.ac_hidden p:not(.pointer) {
-  color:#000;
+  color:#FFFFFF;
   opacity: 0;
 }
 
@@ -59,11 +58,12 @@
   position:absolute;
 }
 #accordion section:not(.ac_hidden) h1 {
-  background-color:lightblue;
-  color: #000;
+  background-color:#23252b;
+  color: #2aa1d3;
+  /*border: 1px solid #2aa1d3;*/
 }
 #accordion section:not(.ac_hidden) h1 a {
-  color: #000;
+  color: #2aa1d3;
 }
 
 #accordion section:not(.ac_hidden) .pointer {
