@@ -471,6 +471,8 @@ class DOM2AFrame{
         var self = this;
         //Observer to check for newly added or deleted DOM elements
         var observer = new MutationObserver(function (mutations) {
+            //console.error("GLOBAL MUTATIONS! ", mutations);
+
             mutations.forEach(function (mutation) {
                 if (self.state.acceptTreeMutations) {
                     for (var i = 0; i < mutation.addedNodes.length; i++) {
@@ -486,7 +488,8 @@ class DOM2AFrame{
                 }
             })
         });
-        observer.observe( this.DOM.container, { childList: true } );
+        observer.observe( this.DOM.container, { childList: true, subtree: true } );
+        //observer.observe( document.body, { childList: true, subtree: true } );
     }
 
 } // class DOM2AFrame

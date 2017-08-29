@@ -145,7 +145,7 @@ class Element{
         //Listenes for direct css changes
         // note: attributeOldValue doesn't seem to work for style updates... chucks
         this.mutationObserver = new MutationObserver(this.HandleMutation.bind(this));
-        this.mutationObserver.observe( this.domelement, { attributes: true, childList: false,   characterData: true, subtree: false /*, attributeOldValue : true*/ });
+        this.mutationObserver.observe( this.domelement, { attributes: true, childList: false, characterData: true, subtree: false /*, attributeOldValue : true*/ });
         //(new MutationObserver(this.DOM2AFrame.UpdateAll.bind(this.DOM2AFrame))).observe(    this.domelement, { attributes: true, childList: false,  characterData: true, subtree: false });
 
 
@@ -396,6 +396,12 @@ class Element{
     // in BaseElement because shared by various elements, but not auto-called by Update() because not each element requires it
     UpdateBorders(element_style){
         
+        // at this point, a-frame's position is set, but not yet propagated to the three.js layer...
+        // so we need to postpone setting our border positions with 1 frame to allow three.js to catch up
+        // TODO: make this nicer (i.e. if object3D is a child of our main element in the world, local coords are enough)
+        // something else that we could try to get rid of this raf: make an invisible <a-plane> and give that the border... 
+        requestAnimationFrame( () => {
+
         // TODO: needed because THREE.BoxHelper doesn't automatically follow changes to the underlying mesh. Find some way to update the boxhelper without re-creating it every time
         // NOTE: this commented-out code didn't work... borders just disappear... *headdesk*
         // what is PROBABLY going wrong here:
@@ -461,6 +467,8 @@ class Element{
         let threePlane = this.aelement.object3D.children[0]; // without children[0], we would get the encompassing GROUP, which will position our borders erroneously
 
         // https://threejs.org/docs/#api/geometries/EdgesGeometry
+        // NOTE: we changed this because using this.aelement.setObject3D('border', line) will enable raycast intersections! on our borders, which often gave very wrong and jittery results! 
+        // this is why we add them as a separate threejs.object3D for now, because we don't know if the intersections wouldn't happen if we add it as a child to the aelement.object3D group
         // TODO: replace with this or something similar to support wider lines: https://github.com/spite/THREE.MeshLine/blob/master/src/THREE.MeshLine.js
         var edges = new THREE.EdgesGeometry( threePlane.geometry );
         var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
@@ -475,20 +483,13 @@ class Element{
         //this.borderEntity.setAttribute("position", this.position.xyz);
         //line.position.setZ( line.position.z + 0.001 );
         this.borderObject = line;
-        this.borderObject.visible = false;
+        //this.borderObject.visible = false;
         this.DOM2AFrame.AFrame.scene.object3D.add( this.borderObject );
         
-        requestAnimationFrame( () => {
-            // at this point, a-frame's position is set, but not yet propagated to the three.js layer...
-            // so we need to postpone setting our border positions with 1 frame to allow three.js to catch up
-            // TODO: make this nicer (i.e. if object3D is a child of our main element in the world, local coords are enough)
-            // NOTE: we changed this because using this.aelement.setObject3D('border', line) will enable raycast intersections! on our borders, which often gave very wrong and jittery results! 
-            // this is why we add them as a separate threejs.object3D for now, because we don't know if the intersections wouldn't happen if we add it as a child to the aelement.object3D group
-            // something else that we could try to get rid of this raf: make an invisible <a-plane> and give that the border... 
-            let worldPos = this.aelement.object3D.getWorldPosition();
-            this.borderObject.position.set( worldPos.x, worldPos.y, worldPos.z + this.DOM2AFrame.settings.layerStepSize );
-        this.borderObject.visible = true;
-        });
+        
+        let worldPos = this.aelement.object3D.getWorldPosition();
+        this.borderObject.position.set( worldPos.x, worldPos.y, worldPos.z + this.DOM2AFrame.settings.layerStepSize );
+        //this.borderObject.visible = true;
         //this.borderEntity.setObject3D('border', line); // will auto-remove existing border object if any
 
 
@@ -530,6 +531,8 @@ class Element{
 		}
 		
 		this.borderObject.material.needsUpdate = true;
+        
+        });
 	}
 
     // ex. GetAsset("http://google.com/logo.png", "img")
