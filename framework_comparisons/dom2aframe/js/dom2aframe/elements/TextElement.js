@@ -75,6 +75,7 @@ class TextElement extends Element{
 		else
 			textValue = stripText(this.domelement.innerHTML);
 
+		this.currentTextValue = textValue;
 			
 		//console.log("ElementSpecificUpdate TEXT ", textValue);
 
@@ -154,6 +155,7 @@ class TextElement extends Element{
         // so if we set our anchor to left and offset our calculated center-position (see the Position class), we account for this with correct positioning
  
 		let xyz = this.position.xyz;
+		xyz.width = this.position.width;
 		if( anchor == "left" )
 			xyz.x -= this.position.width / 2; // shift to the left to comply with the text anchor
 		else if( anchor == "right" )
@@ -170,12 +172,14 @@ class TextElement extends Element{
 			xyz.x += parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor;
 			//let paddingTop = element_style.getPropertyValue("padding-top");
 			//xyz.y -= parseFloat(paddingTop) * this.position.DOM2AFrameScalingFactor;
+
+			let paddingRight = element_style.getPropertyValue("padding-right");
+			xyz.width -= parseFloat(paddingRight) * this.position.DOM2AFrameScalingFactor;
+			this.position.AFramePosition.width = xyz.width; // so it's availble in _UpdateTextSize. TODO: see if this doesn't break anything else! 
 		}
 
 		
-		//if( this.domelement.id == "consoleSendButton" )
-		//	console.log("Text alginment info: ", anchor, alignment, paddingLeft, this.position.DOM2AFrameScalingFactor, (parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor));
-
+		
 		xyz.z += this.DOM2AFrame.settings.layerStepSize; // move it slightly on top of the backgroundPlane
 
         this.atext.setAttribute("position", xyz );
@@ -192,10 +196,20 @@ class TextElement extends Element{
 
 		let widthInPixels = this.position.width / this.position.DOM2AFrameScalingFactor;
 		let wrapPixels = widthInPixels * fontScalingFactor;
-		wrapPixels *= 1.075; // for some reason there is still a slight discrepancy with our calculations. This is needed to get at least single-line text to not wrap at the end... MAGIC NUMBER!
 		
+		// for some reason there is still a slight discrepancy with our calculations, but only if there is NO actual wrapping going on...
+		// we use the heuristic of 200 characters to make sure we have wrapped text (at least in our demos) TODO: properly calculate this based on character width metadata1
+		// we use the following magic number to get our text to not wrap on single-lines and make it look similar to what the browser is doing
+		if( this.currentTextValue.length < 200 )
+			wrapPixels *= 1.075; 
+
+
 		this.atext.setAttribute("wrap-pixels", wrapPixels);
 		this.atext.setAttribute( "width", this.position.width);
+
+		//if( this.domelement.id == "consoleSendButton" )
+		//	console.log("Text alginment info: ", anchor, alignment, paddingLeft, this.position.DOM2AFrameScalingFactor, (parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor));
+
 		
 		//console.warn("Set wrappixels to ", wrapPixels, widthInPixels, fontScalingFactor, this.position.DOM2AFrameScalingFactor, this.position.width, actualFontSize, currentFont.info);
 
