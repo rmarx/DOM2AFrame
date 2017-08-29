@@ -46,14 +46,16 @@ body {
                 z-index: 200;
             }
 
-                .animationButtonBox img{
+                .animationButtonBox img, #consoleControls img{
                     display: inline-block;
                     vertical-align: middle;
                     width: 25px;
                     height: 25px;
                     margin-bottom: 5px;
+
+                    cursor: pointer;
                 }
-                .animationButtonBox span{
+                .animationButtonBox span, #consoleControls span{
                     margin: 0px 5px;
                 }
 
@@ -70,11 +72,12 @@ body {
 
         #buttonControls{
             width: 100%;
-            height: 100px;
+            height: 91px;
             border: 1px solid black;
+            color: #FFFFFF;
         }
 
-            #videoTypeToggleButton{
+            #buttonControls button{
                 background-color: #23252b;
                 border: 1px solid #8ab71b;
                 padding: 10px;
@@ -84,12 +87,42 @@ body {
                 box-sizing: content-box;
             }
 
+            /* this doesn't play well with DOM2AFrame at this time :) */
+            /*
+            #videoPlayButton{
+                padding-left: 25px;
+                background: url("../files/img/checked.png") no-repeat left center;
+            }
+            */
+
         #consoleControls{
             box-sizing: border-box;
-            padding: 10px;
             width: 100%;
             border: 1px solid black;
+            background-color: #444953;
+            color: #FFFFFF;
         }
+
+            #consoleInput{
+                height: 95%;
+                width: 60%;
+                color: #23252b;
+                background-color: #525863;
+                border: 1px solid #8ab71b;
+                padding: 5px;
+            }
+
+            #consoleSendButton{
+                background-color: #23252b;
+                border: 1px solid #000000;
+                padding: 7px;
+                color: #23252b;
+                background-color: #8ab71b;
+                text-align: center;
+                display: inline-block;
+                box-sizing: content-box;
+            }
+
 
 #rightColumn{
     float: left;

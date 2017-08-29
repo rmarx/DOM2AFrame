@@ -336,6 +336,7 @@ class DOM2AFrame{
         cursor.setAttribute("color", "green");
         cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+"; objects: ." + this.settings.interactableObjectsTag + "; showLine: true;");
         cursor.setAttribute("line", "color: orange;" );
+        cursor.setAttribute("material", "color: white; shader: flat;");
         //cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+";");
         this.AFrame.camera.appendChild(cursor); 
         

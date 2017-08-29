@@ -10,12 +10,10 @@ class ImageElement extends Element{
 
         this.DOM2AFrame.AFrame.assets.appendChild( this.asset );
 		*/
-		let asset_id = this.GetAsset( this.domelement.getAttribute("src"), "img");
-
-		
+		this.currentSrc = this.domelement.getAttribute("src");
 		this.aelement = document.createElement("a-image");
-        this.aelement.setAttribute("id", "IMAGE_" + asset_id);
-		this.aelement.setAttribute("src","#"+asset_id);
+
+		this._UpdateImage(this.currentSrc);
 		
 		/*
 		this.aelement = document.createElement("a-plane");
@@ -37,9 +35,23 @@ class ImageElement extends Element{
 			this.SetupEventHandlers();
 	}
 
+	_UpdateImage(src){
+		let asset_id = this.GetAsset( src, "img");
+
+        this.aelement.setAttribute("id", "IMAGE_" + asset_id);
+		this.aelement.setAttribute("src","#"+asset_id);
+	}
+
 	ElementSpecificUpdate(element_style){
 		//console.log("ElementSpecificUpdate IMAGE ");
 		
+		let src = this.domelement.getAttribute("src");
+		if( src != this.currentSrc ){
+			this.currentSrc = src;
+			this._UpdateImage( this.currentSrc );
+		}
+
+
 		var width = this.position.width;
 		var height = this.position.height;
 
