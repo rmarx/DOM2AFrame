@@ -123,13 +123,20 @@ $(document).ready(function() {
 
     });
 
+    $("#consoleInput").click(function(e) {
+        let inputEl = document.getElementById("consoleInput");
+        if( inputEl !== document.activeElement )
+            inputEl.focus();
+    });
+
     const container = document.getElementById("container");
     if( container.aframeSceneLoaded )
         $("#debugToggle").attr("checked", (window.MainDOM2AFrame.state.debugging ? "checked" : false));
-    else
+    else{ 
         container.addEventListener("aframe-scene-loaded", (evt) => { 
             $("#debugToggle").attr("checked", (window.MainDOM2AFrame.state.debugging ? "checked" : false)); 
         });
+    }
 });
 
 

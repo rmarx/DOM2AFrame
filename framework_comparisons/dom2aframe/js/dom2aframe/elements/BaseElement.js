@@ -475,6 +475,7 @@ class Element{
         //this.borderEntity.setAttribute("position", this.position.xyz);
         //line.position.setZ( line.position.z + 0.001 );
         this.borderObject = line;
+        this.borderObject.visible = false;
         this.DOM2AFrame.AFrame.scene.object3D.add( this.borderObject );
         
         requestAnimationFrame( () => {
@@ -486,6 +487,7 @@ class Element{
             // something else that we could try to get rid of this raf: make an invisible <a-plane> and give that the border... 
             let worldPos = this.aelement.object3D.getWorldPosition();
             this.borderObject.position.set( worldPos.x, worldPos.y, worldPos.z + this.DOM2AFrame.settings.layerStepSize );
+        this.borderObject.visible = true;
         });
         //this.borderEntity.setObject3D('border', line); // will auto-remove existing border object if any
 

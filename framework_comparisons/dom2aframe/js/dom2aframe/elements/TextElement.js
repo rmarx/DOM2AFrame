@@ -149,6 +149,7 @@ class TextElement extends Element{
 		this.atext.setAttribute("anchor", anchor);
 		this.atext.setAttribute("align", alignment);
 
+
         // need to do custom positioning here because anchoring text elements doesn't work properly (i.e. anchor center (as is default for other objects) and text-align left shifts the text way too far to the left)
         // so if we set our anchor to left and offset our calculated center-position (see the Position class), we account for this with correct positioning
  
@@ -162,11 +163,18 @@ class TextElement extends Element{
 		// TODO: make this more neat, now only works for baseline == "top"
 		//xyz.y += (this.position.height / 2) * 0.85;
 
-		// need to take into account top padding! (for some fluke reason, top padding is included in the getClientBoundingRect...)
-		let paddingLeft = element_style.getPropertyValue("padding-left");
-		xyz.x += parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor;
-		//let paddingTop = element_style.getPropertyValue("padding-top");
-		//xyz.y -= parseFloat(paddingTop) * this.position.DOM2AFrameScalingFactor;
+		// for some reason, the measurements for BUTTON elements are off and we don't need to add the extra left padding, even if it is set... strangeness 
+		if( this.domelement.tagName != "BUTTON" ){
+		// need to take into account left padding! (for some fluke reason, top padding is included in the getClientBoundingRect...)
+			let paddingLeft = element_style.getPropertyValue("padding-left");
+			xyz.x += parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor;
+			//let paddingTop = element_style.getPropertyValue("padding-top");
+			//xyz.y -= parseFloat(paddingTop) * this.position.DOM2AFrameScalingFactor;
+		}
+
+		
+		//if( this.domelement.id == "consoleSendButton" )
+		//	console.log("Text alginment info: ", anchor, alignment, paddingLeft, this.position.DOM2AFrameScalingFactor, (parseFloat(paddingLeft) * this.position.DOM2AFrameScalingFactor));
 
 		xyz.z += this.DOM2AFrame.settings.layerStepSize; // move it slightly on top of the backgroundPlane
 

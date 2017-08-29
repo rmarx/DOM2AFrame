@@ -271,7 +271,7 @@ class DOM2AFrame{
         //this.AFrame.container.setAttribute("rotation", "-45 0 0" ); // FIXME: REMOVE!
         this.AFrame.scene.appendChild(this.AFrame.container);
 
-        //Calc the ammount of pixels in 1 meter
+        //Calc the amount of pixels in 1 meter
         var standard_p = document.createElement("p");
         standard_p.setAttribute("style", "font-size:1vw;")
         document.body.appendChild(standard_p);
