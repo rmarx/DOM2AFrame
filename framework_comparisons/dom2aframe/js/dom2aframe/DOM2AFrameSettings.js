@@ -24,5 +24,7 @@ class DOM2AFrameSettings {
         this.imageElementTags       = new Set(["IMG"]);
 
         this.transparantColor       = undefined; // if undefined, will be calculated automatically
+
+        this.showCursor             = true;
     }
 }

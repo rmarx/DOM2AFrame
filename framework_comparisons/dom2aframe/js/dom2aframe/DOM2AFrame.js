@@ -338,6 +338,10 @@ class DOM2AFrame{
         cursor.setAttribute("line", "color: orange;" );
         cursor.setAttribute("material", "color: white; shader: flat;");
         //cursor.setAttribute("raycaster", "far: "+(cameraFar * 10)+";");
+
+        if( !this.settings.showCursor )
+            cursor.setAttribute("visible", false);
+
         this.AFrame.camera.appendChild(cursor); 
         
         this.AFrame.camera.components["wasd-controls"].data.fly =  true;
