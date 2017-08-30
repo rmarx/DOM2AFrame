@@ -130,6 +130,7 @@
     </style>
 
     <!-- TODO: bundle everything up with webpack or something instead of including separate files -->
+    <script type="text/javascript" src="../base/testRunner.js"></script>
     <script type="text/javascript" src="../base/rStats.js"></script>
    <!-- <script type="text/javascript" src="js/dom2aframe/dom2aframe_v1.js"></script> -->
     <script type="text/javascript" src="js/dom2aframe/helpers/Logger.js"></script>
@@ -146,7 +147,7 @@
     <script type="text/javascript" src="../base/changeFunctions.js"></script>
     <script type="text/javascript">
         
-        let constantUpdateLoop = false; // updates as much as possible, always. If false, only updates like this during animations
+        let constantUpdateLoop = true; // updates as much as possible, always. If false, only updates like this during animations
         //let idToRender = "paragraphOne";
         let idToRender = "container"; 
 
@@ -156,7 +157,7 @@
             return;
             /*
             //console.log("RenderToCanvas called");
-            rS('html2canvas').start();
+            rS('dom2aframe').start();
             html2canvas( document.getElementById( idToRender ), {
                 onrendered: function(canvas) {
                     //console.log("html2canvas is done!", canvas);
@@ -170,10 +171,8 @@
                     if( constantUpdateLoop || animateFreely )
                         renderToCanvas();
                 }
-            });
-            */
+            });*/
         }
-        
 
         document.addEventListener('keydown', function (event) {
             //let runningUpdater = undefined;
@@ -212,11 +211,26 @@
        settings.debugClipping = false;
        // settings.showCursor = false; // for screenshots
 
-       //settings.elementIterationStrategy = settings.elementIterationStrategies.FLAT;
        //settings.clippingEnabled = false;
 
        const DOM2AFrame1 = new DOM2AFrame( document.getElementById("container"), settings );
        DOM2AFrame1.Init(false);
+            
+        
+
+        setTimeout( () =>{
+            let urlParams = parseQueryString(window.location.search);
+            if( urlParams.test ){
+
+                if( constantUpdateLoop ){
+                    DOM2AFrame1.StartAnimationLoop();
+                }
+
+                // TODO: actually start the animations here! (use a callback function so testRunner can start them?)
+                window.testRunner.Start();
+            }
+
+        }, 3000 ); // give the page some time to load
 
     </script> 
 

@@ -100,6 +100,7 @@
 
     </div>
 
+    <script type="text/javascript" src="../base/testRunner.js"></script>
     <script type="text/javascript" src="../base/rStats.js"></script>
     <script type="text/javascript" src="js/rasterizeHTML/rasterizeHTML.allinone.js"></script>
     <script type="text/javascript" src="../base/changeFunctions.js"></script>
@@ -126,6 +127,8 @@
                     var timeSpent = rS('rasterizeHTML').end();
 
                     console.log("Time spent drawing rasterizeHTML: " + timeSpent, renderResult);
+                    if( window.testRunner.running )
+                        window.testRunner.LogResult("frametime", timeSpent);
 
                     if( constantUpdateLoop || animateFreely )
                         renderToCanvas();
@@ -134,6 +137,17 @@
                     console.error("RasterizeHTML failed ", e);
                 });
         }
+
+
+
+        setTimeout( () =>{
+            let urlParams = parseQueryString(window.location.search);
+            if( urlParams.test ){
+                // TODO: actually start the animations here! (use a callback function so testRunner can start them?)
+                window.testRunner.Start();
+            }
+
+        }, 3000 ); // give the page some time to load
 
         document.addEventListener('keydown', function (event) {
             //let runningUpdater = undefined;

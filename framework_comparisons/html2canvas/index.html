@@ -79,6 +79,7 @@
 
     </div>
 
+    <script type="text/javascript" src="../base/testRunner.js"></script>
     <script type="text/javascript" src="../base/rStats.js"></script>
     <script type="text/javascript" src="js/html2canvas/html2canvas.js"></script>
     <!--<script type="text/javascript" src="js/html2canvas/html2canvas.svg.js"></script>-->
@@ -102,12 +103,23 @@
                     var timeSpent = rS('html2canvas').end();
 
                     console.log("Time spent drawing html2canvas: " + timeSpent + " -> ", window.performance.memory );
+                    if( window.testRunner.running )
+                        window.testRunner.LogResult("frametime", timeSpent);
                     
                     if( constantUpdateLoop || animateFreely )
                         renderToCanvas();
                 }
             });
         }
+
+        setTimeout( () =>{
+            let urlParams = parseQueryString(window.location.search);
+            if( urlParams.test ){
+                // TODO: actually start the animations here! (use a callback function so testRunner can start them?)
+                window.testRunner.Start();
+            }
+
+        }, 3000 ); // give the page some time to load
 
         document.addEventListener('keydown', function (event) {
             //let runningUpdater = undefined;

@@ -461,6 +461,14 @@ function renderStats() {
     rS( 'rAF' ).tick();
     rS( 'FPS' ).frame();
     rS().update();
+
+    if( window.testRunner.running ){
+        let raf = rS('rAF').value();
+        let fps = rS('FPS').value();
+
+        window.testRunner.LogResult("RAF", raf);
+        window.testRunner.LogResult("FPS", fps);
+    }
     
     requestAnimationFrame( renderStats );
 }
