@@ -19,8 +19,8 @@ class DOM2AFrameSettings {
         this.debugClipping = true; 
 
         this.ignoreElementTags      = new Set(["BR", "SOURCE"]);
-        this.containerElementTags   = new Set(["DIV", "SECTION", "BODY", "TABLE", "TR", "VIDEO", "CANVAS"]);
-        this.textElementTags        = new Set(["P", "SPAN", "H1", "H2", "H3", "H4", "H5", "H6", "BUTTON", "A", "TD", "TH", "TBODY", "INPUT"]);
+        this.containerElementTags   = new Set(["DIV", "SECTION", "BODY", "TABLE", "TR", "TBODY", "VIDEO", "CANVAS"]);
+        this.textElementTags        = new Set(["P", "SPAN", "H1", "H2", "H3", "H4", "H5", "H6", "BUTTON", "A", "TD", "TH", "INPUT"]);
         this.imageElementTags       = new Set(["IMG"]);
 
         this.transparantColor       = undefined; // if undefined, will be calculated automatically
