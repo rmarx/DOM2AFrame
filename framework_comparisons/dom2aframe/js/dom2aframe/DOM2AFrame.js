@@ -90,7 +90,7 @@ class DOM2AFrame{
             this.AFrame.scene.components.stats.stats('dom2aframe').end();
             let updateDuration = this.AFrame.scene.components.stats.stats('dom2aframe').value();
 
-            if( window.testRunner.running )
+            if( window.testRunner && window.testRunner.running )
                 window.testRunner.LogResult("frametime", updateDuration);
 
             // TODO: add separate RAF outside of this to catch the tick rates from the rStat (or maybe our own rStat will update that correctly? )
